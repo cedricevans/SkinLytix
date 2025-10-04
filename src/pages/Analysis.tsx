@@ -28,6 +28,13 @@ interface AnalysisData {
       brand?: string;
       category?: string;
     };
+    ingredient_data?: Array<{
+      name: string;
+      data?: {
+        pubchem_cid?: string;
+        [key: string]: any;
+      };
+    }>;
   };
   analyzed_at: string;
 }
@@ -94,11 +101,21 @@ const Analysis = () => {
         return;
       }
 
-      // Parse ingredients from the stored list
-      const ingredientsArray = analysis.ingredients_list
-        .split(/[,\n]/)
-        .map((i: string) => i.trim())
-        .filter((i: string) => i.length > 0);
+      // Try to get enriched ingredient data with PubChem CIDs
+      let ingredientsArray;
+      if (analysis.recommendations_json?.ingredient_data) {
+        // Use enriched data with PubChem CIDs
+        ingredientsArray = analysis.recommendations_json.ingredient_data.map((ing: any) => ({
+          name: ing.name,
+          pubchem_cid: ing.data?.pubchem_cid || null
+        }));
+      } else {
+        // Fallback to string parsing (backward compatibility)
+        ingredientsArray = analysis.ingredients_list
+          .split(/[,\n]/)
+          .map((i: string) => i.trim())
+          .filter((i: string) => i.length > 0);
+      }
 
       const { data, error } = await supabase.functions.invoke('save-product', {
         body: {
