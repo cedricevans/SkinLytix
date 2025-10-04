@@ -71,7 +71,7 @@ Provide a comprehensive analysis covering:
 1. INGREDIENT REDUNDANCIES: Identify duplicate active ingredients across products with specific percentages/concentrations
 2. CONFLICTING ACTIVES: Flag combinations that may cause irritation or reduce effectiveness
 3. FORMULATION ISSUES: Point out problematic ingredients like high fragrance content, lack of stabilizers
-4. COST OPTIMIZATION: Suggest more cost-effective alternatives that provide the same key ingredients
+4. COST OPTIMIZATION: Suggest more cost-effective alternatives that provide the same key ingredients with NUMERIC savings
 5. ROUTINE EFFICIENCY: Recommend which products could be eliminated without losing benefits
 
 Format your response as a structured JSON with these sections:
@@ -79,11 +79,20 @@ Format your response as a structured JSON with these sections:
   "redundancies": [{ "ingredient": "", "products": [], "recommendation": "" }],
   "conflicts": [{ "actives": [], "risk": "", "suggestion": "" }],
   "formulationIssues": [{ "product": "", "issue": "", "impact": "" }],
-  "costOptimizations": [{ "product": "", "keyIngredients": [], "suggestedAlternative": "", "potentialSavings": "" }],
+  "costOptimizations": [{ 
+    "product": "", 
+    "currentPrice": 45.00,
+    "keyIngredients": [], 
+    "suggestedAlternative": "", 
+    "alternativePrice": 25.00,
+    "potentialSavings": 20.00
+  }],
   "routineEfficiency": { "canEliminate": [], "reasoning": "" },
   "overallScore": 85,
   "summary": ""
-}`;
+}
+
+IMPORTANT: For costOptimizations, use actual numeric values for currentPrice, alternativePrice, and potentialSavings based on the product prices provided.`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -113,6 +122,13 @@ Format your response as a structured JSON with these sections:
     // Calculate total cost
     const totalCost = productsData.reduce((sum, p) => sum + (p.price || 0), 0);
     optimizationData.totalRoutineCost = totalCost;
+
+    // Calculate total potential savings
+    const totalPotentialSavings = optimizationData.costOptimizations?.reduce(
+      (sum: number, opt: any) => sum + (opt.potentialSavings || 0),
+      0
+    ) || 0;
+    optimizationData.totalPotentialSavings = totalPotentialSavings;
 
     // Store optimization results
     const { data: optimization, error: optError } = await supabase

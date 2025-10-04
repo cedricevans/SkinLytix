@@ -25,9 +25,11 @@ interface OptimizationData {
   }>;
   costOptimizations: Array<{
     product: string;
+    currentPrice: number;
     keyIngredients: string[];
     suggestedAlternative: string;
-    potentialSavings: string;
+    alternativePrice: number;
+    potentialSavings: number;
   }>;
   routineEfficiency: {
     canEliminate: string[];
@@ -36,6 +38,7 @@ interface OptimizationData {
   overallScore: number;
   summary: string;
   totalRoutineCost: number;
+  totalPotentialSavings?: number;
 }
 
 export default function RoutineOptimization() {
@@ -194,12 +197,20 @@ export default function RoutineOptimization() {
           <Card className="p-6 mb-6">
             <div className="flex items-start gap-3 mb-4">
               <DollarSign className="w-5 h-5 text-green-500 mt-1" />
-              <div>
+              <div className="flex-1">
                 <h2 className="text-xl font-bold">Cost Optimization Opportunities</h2>
                 <p className="text-sm text-muted-foreground">
                   Save money with these alternatives
                 </p>
               </div>
+              {data.totalPotentialSavings !== undefined && data.totalPotentialSavings > 0 && (
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Total Potential Savings</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    ${data.totalPotentialSavings.toFixed(2)}
+                  </p>
+                </div>
+              )}
             </div>
             <div className="space-y-4">
               {data.costOptimizations.map((item, idx) => (
@@ -208,11 +219,28 @@ export default function RoutineOptimization() {
                   <p className="text-sm text-muted-foreground mb-2">
                     Key ingredients: {item.keyIngredients.join(", ")}
                   </p>
-                  <p className="text-sm mb-1">
+                  <div className="flex items-center gap-4 my-2">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Current</p>
+                      <p className="text-lg font-semibold">${item.currentPrice.toFixed(2)}</p>
+                    </div>
+                    <div className="text-muted-foreground">→</div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Alternative</p>
+                      <p className="text-lg font-semibold">${item.alternativePrice.toFixed(2)}</p>
+                    </div>
+                    <div className="ml-auto text-right">
+                      <p className="text-xs text-muted-foreground">You Save</p>
+                      <p className="text-lg font-bold text-green-600">
+                        ${item.potentialSavings.toFixed(2)}
+                      </p>
+                      <p className="text-xs text-green-600">
+                        ({((item.potentialSavings / item.currentPrice) * 100).toFixed(0)}% off)
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm">
                     <strong>Alternative:</strong> {item.suggestedAlternative}
-                  </p>
-                  <p className="text-sm text-green-600 font-semibold">
-                    {item.potentialSavings}
                   </p>
                 </div>
               ))}

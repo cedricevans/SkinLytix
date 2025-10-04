@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Sparkles, DollarSign, AlertTriangle } from "lucide-react";
 
@@ -36,6 +38,11 @@ export default function Routine() {
   const [availableAnalyses, setAvailableAnalyses] = useState<Analysis[]>([]);
   const [loading, setLoading] = useState(false);
   const [optimizing, setOptimizing] = useState(false);
+  
+  const [showPriceDialog, setShowPriceDialog] = useState(false);
+  const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
+  const [productPrice, setProductPrice] = useState("");
+  const [usageFrequency, setUsageFrequency] = useState("Both");
 
   useEffect(() => {
     loadRoutineAndAnalyses();
@@ -106,22 +113,32 @@ export default function Routine() {
     }
   };
 
-  const handleAddProduct = async (analysisId: string) => {
-    if (!routineId) return;
+  const openPriceDialog = (analysisId: string) => {
+    setSelectedAnalysisId(analysisId);
+    setProductPrice("");
+    setUsageFrequency("Both");
+    setShowPriceDialog(true);
+  };
+
+  const handleAddProduct = async () => {
+    if (!routineId || !selectedAnalysisId) return;
+
+    const price = parseFloat(productPrice) || 0;
 
     try {
       const { error } = await supabase
         .from("routine_products")
         .insert({
           routine_id: routineId,
-          analysis_id: analysisId,
-          usage_frequency: "Both",
-          product_price: 0,
+          analysis_id: selectedAnalysisId,
+          usage_frequency: usageFrequency,
+          product_price: price,
         });
 
       if (error) throw error;
 
       toast.success("Product added to routine");
+      setShowPriceDialog(false);
       loadRoutineAndAnalyses();
     } catch (error) {
       console.error("Error adding product:", error);
@@ -271,7 +288,7 @@ export default function Routine() {
                       </p>
                     </div>
                     <Button
-                      onClick={() => handleAddProduct(analysis.id)}
+                      onClick={() => openPriceDialog(analysis.id)}
                       size="sm"
                     >
                       <Plus className="w-4 h-4 mr-2" />
@@ -282,6 +299,49 @@ export default function Routine() {
               ))}
           </div>
         </div>
+
+        {/* Price Input Dialog */}
+        <Dialog open={showPriceDialog} onOpenChange={setShowPriceDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Product to Routine</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="price">Product Price ($)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={productPrice}
+                  onChange={(e) => setProductPrice(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="frequency">Usage Frequency</Label>
+                <select
+                  id="frequency"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={usageFrequency}
+                  onChange={(e) => setUsageFrequency(e.target.value)}
+                >
+                  <option value="AM">Morning (AM)</option>
+                  <option value="PM">Evening (PM)</option>
+                  <option value="Both">Both AM & PM</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPriceDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddProduct}>
+                Add Product
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
