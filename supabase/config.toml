@@ -1,1 +1,10 @@
 project_id = "yflbjaetupvakadqjhfb"
+
+[functions.query-open-beauty-facts]
+verify_jwt = false
+
+[functions.query-pubchem]
+verify_jwt = false
+
+[functions.analyze-product]
+verify_jwt = true
