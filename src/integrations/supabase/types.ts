@@ -14,7 +14,211 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ingredient_cache: {
+        Row: {
+          cached_at: string | null
+          id: string
+          ingredient_name: string
+          molecular_weight: number | null
+          properties_json: Json | null
+          pubchem_cid: string | null
+        }
+        Insert: {
+          cached_at?: string | null
+          id?: string
+          ingredient_name: string
+          molecular_weight?: number | null
+          properties_json?: Json | null
+          pubchem_cid?: string | null
+        }
+        Update: {
+          cached_at?: string | null
+          id?: string
+          ingredient_name?: string
+          molecular_weight?: number | null
+          properties_json?: Json | null
+          pubchem_cid?: string | null
+        }
+        Relationships: []
+      }
+      product_cache: {
+        Row: {
+          barcode: string
+          cached_at: string | null
+          id: string
+          obf_data_json: Json
+        }
+        Insert: {
+          barcode: string
+          cached_at?: string | null
+          id?: string
+          obf_data_json: Json
+        }
+        Update: {
+          barcode?: string
+          cached_at?: string | null
+          id?: string
+          obf_data_json?: Json
+        }
+        Relationships: []
+      }
+      product_ingredients: {
+        Row: {
+          created_at: string | null
+          id: string
+          ingredient_name: string
+          ingredient_order: number
+          product_id: string
+          pubchem_cid: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ingredient_name: string
+          ingredient_order: number
+          product_id: string
+          pubchem_cid?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ingredient_name?: string
+          ingredient_order?: number
+          product_id?: string
+          pubchem_cid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_ingredients_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          barcode: string | null
+          brand: string | null
+          category: string | null
+          contributed_by_user_id: string | null
+          date_added: string | null
+          id: string
+          image_url: string | null
+          last_verified_date: string | null
+          product_name: string
+          updated_at: string | null
+          verification_count: number | null
+        }
+        Insert: {
+          barcode?: string | null
+          brand?: string | null
+          category?: string | null
+          contributed_by_user_id?: string | null
+          date_added?: string | null
+          id?: string
+          image_url?: string | null
+          last_verified_date?: string | null
+          product_name: string
+          updated_at?: string | null
+          verification_count?: number | null
+        }
+        Update: {
+          barcode?: string | null
+          brand?: string | null
+          category?: string | null
+          contributed_by_user_id?: string | null
+          date_added?: string | null
+          id?: string
+          image_url?: string | null
+          last_verified_date?: string | null
+          product_name?: string
+          updated_at?: string | null
+          verification_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_contributed_by_user_id_fkey"
+            columns: ["contributed_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_analyses: {
+        Row: {
+          analyzed_at: string | null
+          epiq_score: number | null
+          id: string
+          ingredients_list: string
+          product_id: string | null
+          product_name: string
+          recommendations_json: Json | null
+          user_id: string
+        }
+        Insert: {
+          analyzed_at?: string | null
+          epiq_score?: number | null
+          id?: string
+          ingredients_list: string
+          product_id?: string | null
+          product_name: string
+          recommendations_json?: Json | null
+          user_id: string
+        }
+        Update: {
+          analyzed_at?: string | null
+          epiq_score?: number | null
+          id?: string
+          ingredients_list?: string
+          product_id?: string | null
+          product_name?: string
+          recommendations_json?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_analyses_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_analyses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
