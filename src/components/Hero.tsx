@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import heroBackground from "@/assets/hero-background.jpg";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -42,7 +45,12 @@ const Hero = () => {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-          <Button variant="cta" size="lg" className="text-base px-8 py-6 h-auto">
+          <Button 
+            variant="cta" 
+            size="lg" 
+            className="text-base px-8 py-6 h-auto"
+            onClick={() => navigate('/auth')}
+          >
             Analyze Your Products Free
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>

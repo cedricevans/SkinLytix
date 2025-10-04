@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CTASection = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="py-24 px-6 bg-gradient-hero relative overflow-hidden">
       {/* Background Pattern */}
@@ -27,7 +30,12 @@ const CTASection = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-          <Button variant="cta" size="lg" className="text-base px-8 py-6 h-auto bg-cta hover:bg-cta/90">
+          <Button 
+            variant="cta" 
+            size="lg" 
+            className="text-base px-8 py-6 h-auto bg-cta hover:bg-cta/90"
+            onClick={() => navigate('/auth')}
+          >
             Start Your First Analysis
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
