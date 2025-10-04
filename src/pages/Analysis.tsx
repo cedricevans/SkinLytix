@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle2, Sparkles, Home, ScanLine, Database, Users } from "lucide-react";
+import { AlertCircle, CheckCircle2, Sparkles, Home, ScanLine, Database, Users, Plus } from "lucide-react";
 import PostAnalysisFeedback from "@/components/PostAnalysisFeedback";
 
 interface AnalysisData {
@@ -34,6 +34,7 @@ const Analysis = () => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [savedToDb, setSavedToDb] = useState(false);
+  const [addingToRoutine, setAddingToRoutine] = useState(false);
 
   const fetchAnalysis = async () => {
     if (!id) return;
@@ -126,6 +127,69 @@ const Analysis = () => {
     }
   };
 
+  const handleAddToRoutine = async () => {
+    setAddingToRoutine(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Not authenticated",
+          description: "Please sign in to add to routine",
+          variant: "destructive",
+        });
+        navigate("/auth");
+        return;
+      }
+
+      // Get or create routine
+      const { data: routines } = await supabase
+        .from("routines")
+        .select("id")
+        .eq("user_id", user.id)
+        .limit(1);
+
+      let routineId: string;
+
+      if (routines && routines.length > 0) {
+        routineId = routines[0].id;
+      } else {
+        const { data: newRoutine } = await supabase
+          .from("routines")
+          .insert({ user_id: user.id, routine_name: "My Skincare Routine" })
+          .select("id")
+          .single();
+        routineId = newRoutine!.id;
+      }
+
+      // Add product to routine
+      const { error } = await supabase
+        .from("routine_products")
+        .insert({
+          routine_id: routineId,
+          analysis_id: id,
+          usage_frequency: "Both",
+          product_price: 0,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Added to routine!",
+        description: "Product added to your skincare routine",
+      });
+      navigate("/routine");
+    } catch (error: any) {
+      console.error("Error adding to routine:", error);
+      toast({
+        title: "Failed to add to routine",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setAddingToRoutine(false);
+    }
+  };
+
   useEffect(() => {
     fetchAnalysis();
   }, [id]);
@@ -163,10 +227,20 @@ const Analysis = () => {
             <Home className="w-4 h-4 mr-2" />
             Back to Home
           </Button>
-          <Button variant="outline" onClick={() => navigate('/upload')}>
-            <ScanLine className="w-4 h-4 mr-2" />
-            Analyze Another
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handleAddToRoutine}
+              disabled={addingToRoutine}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {addingToRoutine ? "Adding..." : "Add to Routine"}
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/upload')}>
+              <ScanLine className="w-4 h-4 mr-2" />
+              Analyze Another
+            </Button>
+          </div>
         </div>
 
         <div className="mb-8">

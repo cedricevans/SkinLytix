@@ -8,6 +8,8 @@ import Upload from "./pages/Upload";
 import Analysis from "./pages/Analysis";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
+import Routine from "./pages/Routine";
+import RoutineOptimization from "./pages/RoutineOptimization";
 import NotFound from "./pages/NotFound";
 import FeedbackWidget from "@/components/FeedbackWidget";
 
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/analysis/:id" element={<Analysis />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/routine" element={<Routine />} />
+          <Route path="/routine/optimization/:id" element={<RoutineOptimization />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

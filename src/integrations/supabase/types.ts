@@ -216,6 +216,101 @@ export type Database = {
         }
         Relationships: []
       }
+      routine_optimizations: {
+        Row: {
+          created_at: string
+          id: string
+          optimization_data: Json
+          routine_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          optimization_data: Json
+          routine_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          optimization_data?: Json
+          routine_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_optimizations_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "routines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routine_products: {
+        Row: {
+          analysis_id: string
+          created_at: string
+          id: string
+          product_price: number | null
+          routine_id: string
+          usage_frequency: string
+        }
+        Insert: {
+          analysis_id: string
+          created_at?: string
+          id?: string
+          product_price?: number | null
+          routine_id: string
+          usage_frequency: string
+        }
+        Update: {
+          analysis_id?: string
+          created_at?: string
+          id?: string
+          product_price?: number | null
+          routine_id?: string
+          usage_frequency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_products_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "user_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routine_products_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "routines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routines: {
+        Row: {
+          created_at: string
+          id: string
+          routine_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          routine_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          routine_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_analyses: {
         Row: {
           analyzed_at: string | null
