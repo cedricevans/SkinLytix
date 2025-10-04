@@ -27,6 +27,50 @@ serve(async (req) => {
 
     console.log('Analyzing product:', product_name);
 
+    // Get user profile for personalized scoring
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('skin_type, skin_concerns')
+      .eq('id', user_id)
+      .maybeSingle();
+
+    console.log('User profile:', profile);
+
+    // Check product_cache if barcode provided
+    let cachedProductData = null;
+    if (barcode) {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: cachedProduct } = await supabase
+        .from('product_cache')
+        .select('obf_data_json')
+        .eq('barcode', barcode)
+        .gte('cached_at', thirtyDaysAgo)
+        .maybeSingle();
+
+      if (cachedProduct) {
+        console.log('Product cache HIT for barcode:', barcode);
+        cachedProductData = cachedProduct.obf_data_json;
+      } else {
+        console.log('Product cache MISS for barcode:', barcode);
+        // Query Open Beauty Facts and cache result
+        const obfResponse = await fetch(
+          `${supabaseUrl}/functions/v1/query-open-beauty-facts`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${supabaseKey}`
+            },
+            body: JSON.stringify({ barcode })
+          }
+        );
+        const obfData = await obfResponse.json();
+        if (obfData.product) {
+          cachedProductData = obfData;
+        }
+      }
+    }
+
     // Parse ingredients list
     const ingredientsArray = ingredients_list
       .split(/[,\n]/)
@@ -49,41 +93,118 @@ serve(async (req) => {
     const pubchemData = await pubchemResponse.json();
     const ingredientResults = pubchemData.results || [];
 
-    // Simple rule-based analysis (placeholder logic)
-    // TODO: Implement actual interaction logic and EpiQ scoring
+    // Personalized rule-based analysis with skin profile
     const concerns = [];
     const safe = [];
+    const warnings = [];
     
+    // Common ingredient classifications (expanded)
+    const beneficialIngredients: Record<string, string[]> = {
+      oily: ['salicylic acid', 'niacinamide', 'zinc', 'tea tree'],
+      dry: ['hyaluronic acid', 'ceramide', 'glycerin', 'squalane', 'shea butter'],
+      sensitive: ['centella', 'aloe', 'oat', 'chamomile', 'allantoin'],
+      aging: ['retinol', 'vitamin c', 'peptide', 'niacinamide', 'aha'],
+      acne: ['salicylic acid', 'benzoyl peroxide', 'niacinamide', 'azelaic acid'],
+    };
+
+    const problematicIngredients: Record<string, string[]> = {
+      sensitive: ['fragrance', 'alcohol denat', 'essential oil', 'citrus', 'menthol'],
+      oily: ['coconut oil', 'palm oil', 'heavy oils'],
+      acne: ['coconut oil', 'isopropyl myristate', 'lauric acid'],
+    };
+
     for (const result of ingredientResults) {
+      const ingredientLower = result.name.toLowerCase();
+      
       if (result.data) {
         safe.push(result.name);
+        
+        // Check if beneficial for user's skin type/concerns
+        if (profile) {
+          if (profile.skin_type) {
+            const beneficial = beneficialIngredients[profile.skin_type] || [];
+            if (beneficial.some(b => ingredientLower.includes(b))) {
+              safe.push(`${result.name} (beneficial for ${profile.skin_type} skin)`);
+            }
+          }
+          
+          if (profile.skin_concerns && Array.isArray(profile.skin_concerns)) {
+            for (const concern of profile.skin_concerns) {
+              const beneficial = beneficialIngredients[concern] || [];
+              if (beneficial.some(b => ingredientLower.includes(b))) {
+                safe.push(`${result.name} (targets ${concern})`);
+              }
+            }
+          }
+        }
       } else {
-        // Unknown ingredients are potential concerns
         concerns.push(result.name);
+      }
+
+      // Check for problematic ingredients based on profile
+      if (profile) {
+        if (profile.skin_type) {
+          const problematic = problematicIngredients[profile.skin_type] || [];
+          if (problematic.some(p => ingredientLower.includes(p))) {
+            warnings.push(`⚠️ ${result.name} may not suit ${profile.skin_type} skin`);
+          }
+        }
+        
+        if (profile.skin_concerns && Array.isArray(profile.skin_concerns)) {
+          for (const concern of profile.skin_concerns) {
+            const problematic = problematicIngredients[concern] || [];
+            if (problematic.some(p => ingredientLower.includes(p))) {
+              warnings.push(`⚠️ ${result.name} may worsen ${concern}`);
+            }
+          }
+        }
       }
     }
 
-    // Calculate basic EpiQ score (0-100)
-    // Higher score = safer/better formulation
+    // Calculate personalized EpiQ score (0-100)
     const totalIngredients = ingredientsArray.length;
     const safeCount = safe.length;
-    const epiqScore = totalIngredients > 0 
+    let epiqScore = totalIngredients > 0 
       ? Math.round((safeCount / totalIngredients) * 100) 
       : 50;
 
-    // Generate recommendations
+    // Apply skin profile modifiers
+    if (profile) {
+      // Deduct points for warnings
+      epiqScore = Math.max(0, epiqScore - (warnings.length * 5));
+      
+      // Bonus points for matching beneficial ingredients
+      const beneficialMatches = safe.filter(s => s.includes('beneficial') || s.includes('targets'));
+      epiqScore = Math.min(100, epiqScore + (beneficialMatches.length * 3));
+    }
+
+    // Generate personalized recommendations
+    const routineSuggestions = [];
+    if (profile?.skin_type === 'sensitive') {
+      routineSuggestions.push('Patch test before full application');
+      routineSuggestions.push('Use in the evening to minimize sun sensitivity');
+    } else if (profile?.skin_type === 'oily') {
+      routineSuggestions.push('Apply to clean, dry skin morning and night');
+      routineSuggestions.push('Follow with oil-free moisturizer if needed');
+    } else if (profile?.skin_type === 'dry') {
+      routineSuggestions.push('Layer over hydrating toner for best results');
+      routineSuggestions.push('Seal with rich moisturizer to prevent water loss');
+    } else {
+      routineSuggestions.push('Use consistently for best results');
+      routineSuggestions.push('Follow with moisturizer and SPF in AM');
+    }
+
     const recommendations = {
       safe_ingredients: safe,
       concern_ingredients: concerns,
+      warnings: warnings,
       summary: epiqScore >= 70 
-        ? 'This product has a good ingredient profile.' 
+        ? `Great match for your ${profile?.skin_type || ''} skin! This product has a strong ingredient profile.` 
         : epiqScore >= 50 
-          ? 'This product has some ingredients that may require attention.' 
-          : 'Consider alternative products with safer ingredient profiles.',
-      routine_suggestions: [
-        'Use this product in your evening routine',
-        'Follow with a moisturizer to lock in benefits'
-      ]
+          ? `Decent option. Some ingredients may need attention for your ${profile?.skin_type || ''} skin.` 
+          : `Not ideal for your skin profile. Consider alternatives with safer formulations.`,
+      routine_suggestions: routineSuggestions,
+      personalized: !!profile,
     };
 
     // Check if product exists in database

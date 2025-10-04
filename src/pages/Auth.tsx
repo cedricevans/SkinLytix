@@ -39,10 +39,10 @@ const Auth = () => {
 
       toast({
         title: "Account Created!",
-        description: "Welcome to SkinLytix. You can now start analyzing products.",
+        description: "Welcome to SkinLytix. Let's set up your profile.",
       });
       
-      navigate('/upload');
+      navigate('/onboarding');
     } catch (error: any) {
       toast({
         title: "Sign Up Failed",
@@ -66,12 +66,19 @@ const Auth = () => {
 
       if (error) throw error;
 
+      // Check if profile is complete
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_profile_complete')
+        .eq('id', (await supabase.auth.getUser()).data.user?.id!)
+        .single();
+
       toast({
         title: "Welcome Back!",
         description: "Successfully signed in.",
       });
       
-      navigate('/upload');
+      navigate(profile?.is_profile_complete ? '/upload' : '/onboarding');
     } catch (error: any) {
       toast({
         title: "Sign In Failed",

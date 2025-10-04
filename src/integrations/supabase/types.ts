@@ -153,6 +153,9 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          is_profile_complete: boolean | null
+          skin_concerns: Json | null
+          skin_type: Database["public"]["Enums"]["skin_type_enum"] | null
           updated_at: string | null
         }
         Insert: {
@@ -160,6 +163,9 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id: string
+          is_profile_complete?: boolean | null
+          skin_concerns?: Json | null
+          skin_type?: Database["public"]["Enums"]["skin_type_enum"] | null
           updated_at?: string | null
         }
         Update: {
@@ -167,6 +173,9 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          is_profile_complete?: boolean | null
+          skin_concerns?: Json | null
+          skin_type?: Database["public"]["Enums"]["skin_type_enum"] | null
           updated_at?: string | null
         }
         Relationships: []
@@ -227,7 +236,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      skin_type_enum: "oily" | "dry" | "combination" | "sensitive" | "normal"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -354,6 +363,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      skin_type_enum: ["oily", "dry", "combination", "sensitive", "normal"],
+    },
   },
 } as const
