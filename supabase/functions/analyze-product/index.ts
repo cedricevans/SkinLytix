@@ -178,20 +178,244 @@ serve(async (req) => {
       epiqScore = Math.min(100, epiqScore + (beneficialMatches.length * 3));
     }
 
-    // Generate personalized recommendations
-    const routineSuggestions = [];
-    if (profile?.skin_type === 'sensitive') {
-      routineSuggestions.push('Patch test before full application');
-      routineSuggestions.push('Use in the evening to minimize sun sensitivity');
-    } else if (profile?.skin_type === 'oily') {
-      routineSuggestions.push('Apply to clean, dry skin morning and night');
-      routineSuggestions.push('Follow with oil-free moisturizer if needed');
-    } else if (profile?.skin_type === 'dry') {
-      routineSuggestions.push('Layer over hydrating toner for best results');
-      routineSuggestions.push('Seal with rich moisturizer to prevent water loss');
-    } else {
-      routineSuggestions.push('Use consistently for best results');
-      routineSuggestions.push('Follow with moisturizer and SPF in AM');
+    // Ingredient knowledge base
+    const ingredientKnowledge: Record<string, any> = {
+      'retinol': {
+        timing: 'PM only',
+        concerns: ['aging', 'acne'],
+        conflicts: ['vitamin c', 'aha', 'bha'],
+        tips: ['Start 2-3x/week and build tolerance', 'Apply to completely dry skin', 'Wait 20 minutes before moisturizer'],
+        sunSensitivity: true,
+        category: 'active'
+      },
+      'vitamin c': {
+        timing: 'AM preferred',
+        concerns: ['aging', 'hyperpigmentation'],
+        conflicts: ['retinol'],
+        tips: ['Apply to clean skin first', 'Always follow with SPF 30+', 'Store in dark, cool place'],
+        sunSensitivity: true,
+        category: 'active'
+      },
+      'salicylic acid': {
+        timing: 'PM preferred',
+        concerns: ['acne', 'oily'],
+        conflicts: ['retinol'],
+        tips: ['Use on clean, dry skin', 'Start 2x/week if new to acids', 'Avoid eye area'],
+        sunSensitivity: true,
+        category: 'active'
+      },
+      'hyaluronic acid': {
+        timing: 'AM & PM',
+        concerns: ['dry', 'aging'],
+        conflicts: [],
+        tips: ['Apply to damp skin for best absorption', 'Follow with moisturizer to seal', 'Use in humid environments or mist face first'],
+        sunSensitivity: false,
+        category: 'hydrator'
+      },
+      'niacinamide': {
+        timing: 'AM & PM',
+        concerns: ['acne', 'hyperpigmentation', 'oily'],
+        conflicts: [],
+        tips: ['Great layering ingredient', 'Can be used with most actives', 'Safe for all skin types'],
+        sunSensitivity: false,
+        category: 'active'
+      },
+      'aha': {
+        timing: 'PM only',
+        concerns: ['aging', 'hyperpigmentation'],
+        conflicts: ['retinol', 'bha'],
+        tips: ['Use on alternating nights with retinol', 'Must use SPF next morning', 'Start with low concentration'],
+        sunSensitivity: true,
+        category: 'active'
+      },
+      'bha': {
+        timing: 'PM preferred',
+        concerns: ['acne', 'oily'],
+        conflicts: ['retinol', 'aha'],
+        tips: ['Can penetrate oil in pores', 'Use 2-3x per week maximum', 'Don\'t combine with other exfoliants'],
+        sunSensitivity: true,
+        category: 'active'
+      },
+      'peptide': {
+        timing: 'AM & PM',
+        concerns: ['aging'],
+        conflicts: [],
+        tips: ['Works well with niacinamide', 'Apply before heavier creams', 'Consistent use shows results in 8-12 weeks'],
+        sunSensitivity: false,
+        category: 'active'
+      },
+      'ceramide': {
+        timing: 'AM & PM',
+        concerns: ['dry', 'sensitive'],
+        conflicts: [],
+        tips: ['Essential for barrier repair', 'Best used in moisturizers', 'Safe for sensitive skin'],
+        sunSensitivity: false,
+        category: 'hydrator'
+      },
+      'benzoyl peroxide': {
+        timing: 'AM or PM',
+        concerns: ['acne'],
+        conflicts: ['retinol'],
+        tips: ['Use in AM, retinol in PM to avoid interaction', 'Can bleach fabrics', 'Start with 2.5% concentration'],
+        sunSensitivity: false,
+        category: 'active'
+      }
+    };
+
+    // Helper: Detect active ingredients
+    const detectActives = (ingredients: string[]): Array<{name: string, info: any}> => {
+      const detected = [];
+      for (const ingredient of ingredients) {
+        const ingredientLower = ingredient.toLowerCase();
+        for (const [key, info] of Object.entries(ingredientKnowledge)) {
+          if (ingredientLower.includes(key)) {
+            detected.push({ name: key, info });
+            break;
+          }
+        }
+      }
+      return detected;
+    };
+
+    // Helper: Generate timing recommendations
+    const getTimingRecommendations = (actives: Array<{name: string, info: any}>): string[] => {
+      const suggestions = [];
+      const pmOnly = actives.filter(a => a.info.timing === 'PM only');
+      const amPreferred = actives.filter(a => a.info.timing === 'AM preferred');
+      const sunSensitive = actives.filter(a => a.info.sunSensitivity);
+
+      if (pmOnly.length > 0) {
+        suggestions.push(`🌙 Use in PM only - contains ${pmOnly.map(a => a.name).join(', ')}`);
+      }
+      if (amPreferred.length > 0) {
+        suggestions.push(`☀️ Best used in AM - ${amPreferred.map(a => a.name).join(', ')} works well in morning routine`);
+      }
+      if (sunSensitive.length > 0 && !pmOnly.length) {
+        suggestions.push(`⚠️ Increases sun sensitivity - always follow with SPF 30+ the next morning`);
+      }
+      
+      return suggestions;
+    };
+
+    // Helper: Generate concern-specific guidance
+    const getConcernGuidance = (skinConcerns: string[], actives: Array<{name: string, info: any}>): string[] => {
+      const suggestions = [];
+      const concernMap: Record<string, string> = {
+        'acne': 'Apply to problem areas after cleansing. Avoid over-layering multiple acne treatments.',
+        'aging': 'Consistency is key - use nightly for best results. Pair with SPF during day.',
+        'hyperpigmentation': 'Target dark spots directly. Results typically visible in 8-12 weeks with consistent use.',
+        'dryness': 'Apply on damp skin to maximize hydration. Follow with occlusive moisturizer.',
+        'redness': 'Introduce slowly - start 2x/week. Avoid mixing with other actives initially.'
+      };
+
+      for (const concern of skinConcerns) {
+        if (concernMap[concern]) {
+          // Check if actives target this concern
+          const targetingActives = actives.filter(a => a.info.concerns?.includes(concern));
+          if (targetingActives.length > 0) {
+            suggestions.push(`✓ ${concernMap[concern]}`);
+            break; // Only add one concern-specific tip to avoid overwhelming
+          }
+        }
+      }
+
+      return suggestions;
+    };
+
+    // Helper: Detect product category from cached data
+    const detectCategory = (cachedData: any): string => {
+      if (!cachedData?.product) return 'unknown';
+      const categories = cachedData.product.categories_tags || [];
+      if (categories.some((c: string) => c.includes('cleanser'))) return 'cleanser';
+      if (categories.some((c: string) => c.includes('serum'))) return 'serum';
+      if (categories.some((c: string) => c.includes('moisturizer') || c.includes('cream'))) return 'moisturizer';
+      if (categories.some((c: string) => c.includes('sunscreen') || c.includes('spf'))) return 'sunscreen';
+      if (categories.some((c: string) => c.includes('treatment'))) return 'treatment';
+      return 'unknown';
+    };
+
+    // Helper: Get application technique
+    const getApplicationTechnique = (category: string, skinType: string): string[] => {
+      const suggestions = [];
+      const techniques: Record<string, string> = {
+        'cleanser': '💧 Massage for 60 seconds, rinse with lukewarm water. Use AM + PM.',
+        'serum': '💧 Apply 3-5 drops after cleansing. Pat gently, wait 1-2 min before next step.',
+        'moisturizer': '💧 Warm between palms, press into skin. Apply as final step (or before SPF in AM).',
+        'sunscreen': '☀️ Apply 1/4 tsp for face. Reapply every 2 hours. Use as final AM step.',
+        'treatment': '🎯 Apply only to affected areas after serums, before moisturizer.'
+      };
+
+      if (techniques[category]) {
+        suggestions.push(techniques[category]);
+      }
+
+      return suggestions;
+    };
+
+    // Helper: Get interaction warnings
+    const getInteractionWarnings = (actives: Array<{name: string, info: any}>): string[] => {
+      const suggestions = [];
+      const activeNames = actives.map(a => a.name);
+
+      // Check for conflicts
+      if (activeNames.includes('retinol') && (activeNames.includes('aha') || activeNames.includes('bha'))) {
+        suggestions.push('⚠️ Contains retinol + acids - use on alternating nights to prevent irritation');
+      }
+      if (activeNames.includes('benzoyl peroxide') && activeNames.includes('retinol')) {
+        suggestions.push('⚠️ Benzoyl peroxide can inactivate retinol - use BP in AM, retinol in PM');
+      }
+      if (activeNames.includes('vitamin c') && activeNames.includes('retinol')) {
+        suggestions.push('💡 Use vitamin C in AM, retinol in PM for optimal results without interaction');
+      }
+
+      // Positive synergies
+      if (activeNames.includes('niacinamide') && activeNames.includes('peptide')) {
+        suggestions.push('✨ Great combo! Niacinamide + peptides work synergistically for anti-aging');
+      }
+
+      return suggestions;
+    };
+
+    // Helper: Get skin type tips
+    const getSkinTypeTips = (skinType: string, actives: Array<{name: string, info: any}>): string[] => {
+      const suggestions = [];
+      const tips: Record<string, string> = {
+        'sensitive': '🧴 Patch test on inner arm for 24-48 hours before facial use',
+        'oily': '🎯 Apply to clean, dry skin. No need for heavy moisturizer on top',
+        'dry': '💧 Layer over hydrating toner. Seal with rich moisturizer to prevent water loss',
+        'combination': '⚖️ Apply to entire face, but reduce frequency in oily zones if needed',
+        'normal': '✓ Use consistently morning and/or evening based on product type'
+      };
+
+      if (tips[skinType]) {
+        suggestions.push(tips[skinType]);
+      }
+
+      // Add sensitive skin warning if actives present
+      if (skinType === 'sensitive' && actives.length > 0) {
+        suggestions.push('⏱️ Start 2x/week, gradually increase as tolerated');
+      }
+
+      return suggestions;
+    };
+
+    // Generate dynamic routine suggestions
+    const detectedActives = detectActives(ingredientsArray);
+    const productCategory = detectCategory(cachedProductData);
+    
+    const routineSuggestions = [
+      ...getTimingRecommendations(detectedActives),
+      ...getConcernGuidance(profile?.skin_concerns || [], detectedActives),
+      ...getApplicationTechnique(productCategory, profile?.skin_type || 'normal'),
+      ...getInteractionWarnings(detectedActives),
+      ...getSkinTypeTips(profile?.skin_type || 'normal', detectedActives),
+    ].slice(0, 5); // Return top 5 most relevant
+
+    // Add specific active tips if detected
+    for (const active of detectedActives.slice(0, 2)) { // Add tips from up to 2 main actives
+      if (active.info.tips && routineSuggestions.length < 5) {
+        routineSuggestions.push(...active.info.tips.slice(0, 1));
+      }
     }
 
     const recommendations = {
