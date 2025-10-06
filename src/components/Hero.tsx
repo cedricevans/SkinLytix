@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowRight, Hexagon } from "lucide-react";
-import { useState } from "react";
 import heroBackground from "@/assets/hero-background.jpg";
-import WaitlistDialog from "@/components/WaitlistDialog";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
-  const [waitlistDialogOpen, setWaitlistDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <section className="relative min-h-[85vh] md:min-h-[90vh] flex flex-col overflow-hidden">
@@ -65,9 +64,9 @@ const Hero = () => {
             variant="cta" 
             size="lg" 
             className="text-base px-8 py-5 md:py-6 h-auto w-full sm:w-auto"
-            onClick={() => setWaitlistDialogOpen(true)}
+            onClick={() => navigate('/auth')}
           >
-            Join our Community
+            Start Your First Analysis
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
           <Button 
@@ -92,9 +91,6 @@ const Hero = () => {
       {/* Floating Elements */}
       <div className="absolute top-20 left-10 w-24 h-24 bg-accent/10 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-20 right-10 w-32 h-32 bg-cta/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "1s" }} />
-
-      {/* Waitlist Dialog */}
-      <WaitlistDialog open={waitlistDialogOpen} onOpenChange={setWaitlistDialogOpen} />
     </section>
   );
 };
