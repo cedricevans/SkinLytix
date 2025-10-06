@@ -483,7 +483,10 @@ serve(async (req) => {
         category: extractedCategory,
         ingredients_list,
         epiq_score: epiqScore,
-        recommendations_json: recommendations
+        recommendations_json: {
+          ...recommendations,
+          ingredient_data: ingredientResults
+        }
       })
       .select()
       .single();

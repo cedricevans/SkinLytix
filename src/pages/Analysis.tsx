@@ -108,14 +108,15 @@ const Analysis = () => {
         // Use enriched data with PubChem CIDs
         ingredientsArray = analysis.recommendations_json.ingredient_data.map((ing: any) => ({
           name: ing.name,
-          pubchem_cid: ing.data?.pubchem_cid || null
+          pubchem_cid: ing.pubchem_cid || null
         }));
       } else {
         // Fallback to string parsing (backward compatibility)
         ingredientsArray = analysis.ingredients_list
           .split(/[,\n]/)
           .map((i: string) => i.trim())
-          .filter((i: string) => i.length > 0);
+          .filter((i: string) => i.length > 0)
+          .map((name: string) => ({ name, pubchem_cid: null }));
       }
 
       const { data, error } = await supabase.functions.invoke('save-product', {
