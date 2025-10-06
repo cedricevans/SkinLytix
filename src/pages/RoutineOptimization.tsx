@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, AlertTriangle, TrendingDown, DollarSign, CheckCircle } from "lucide-react";
+import { ArrowLeft, AlertTriangle, TrendingDown, DollarSign, CheckCircle, Info } from "lucide-react";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface OptimizationData {
   redundancies: Array<{
@@ -101,7 +102,17 @@ export default function RoutineOptimization() {
         {/* Overall Score */}
         <Card className="p-6 mb-6 bg-gradient-to-br from-primary/10 to-primary/5">
           <div className="text-center">
-            <h1 className="text-3xl font-bold mb-2">Routine Optimization Score</h1>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <h1 className="text-3xl font-bold">Routine Optimization Score</h1>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>Your optimization score reflects how well-balanced and efficient your routine is. Scores consider ingredient conflicts, redundancies, and cost-effectiveness.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <div className="text-6xl font-bold text-primary mb-2">
               {data.overallScore}
             </div>
@@ -117,8 +128,18 @@ export default function RoutineOptimization() {
           <Card className="p-6 mb-6">
             <div className="flex items-start gap-3 mb-4">
               <TrendingDown className="w-5 h-5 text-orange-500 mt-1" />
-              <div>
-                <h2 className="text-xl font-bold">Ingredient Redundancies</h2>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold">Ingredient Redundancies</h2>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>You're using the same active ingredient in multiple products. While not harmful, this may be unnecessary and costly—one product might be enough.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Duplicate ingredients across your products
                 </p>
@@ -143,8 +164,18 @@ export default function RoutineOptimization() {
           <Card className="p-6 mb-6">
             <div className="flex items-start gap-3 mb-4">
               <AlertTriangle className="w-5 h-5 text-red-500 mt-1" />
-              <div>
-                <h2 className="text-xl font-bold">Conflicting Actives</h2>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold">Conflicting Actives</h2>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>These active ingredients may cause irritation, dryness, or reduced effectiveness when used together. Consider separating them (AM/PM) or choosing alternatives.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Ingredients that may cause irritation together
                 </p>
@@ -173,8 +204,18 @@ export default function RoutineOptimization() {
           <Card className="p-6 mb-6">
             <div className="flex items-start gap-3 mb-4">
               <AlertTriangle className="w-5 h-5 text-yellow-500 mt-1" />
-              <div>
-                <h2 className="text-xl font-bold">Formulation Issues</h2>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold">Formulation Issues</h2>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>We've detected problematic ingredients or formulation concerns in these products that may affect their safety or effectiveness for your skin type.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Problematic ingredients in your products
                 </p>
@@ -198,7 +239,17 @@ export default function RoutineOptimization() {
             <div className="flex items-start gap-3 mb-4">
               <DollarSign className="w-5 h-5 text-green-500 mt-1" />
               <div className="flex-1">
-                <h2 className="text-xl font-bold">Cost Optimization Opportunities</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold">Cost Optimization Opportunities</h2>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>These alternatives contain the same key active ingredients at lower prices. Switching could save you money without sacrificing results.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Save money with these alternatives
                 </p>
@@ -253,8 +304,18 @@ export default function RoutineOptimization() {
           <Card className="p-6 mb-6">
             <div className="flex items-start gap-3 mb-4">
               <CheckCircle className="w-5 h-5 text-blue-500 mt-1" />
-              <div>
-                <h2 className="text-xl font-bold">Routine Efficiency</h2>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold">Routine Efficiency</h2>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>These products may be redundant in your routine. Our AI suggests products you could safely remove to simplify your routine without losing benefits.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Simplify your routine without losing benefits
                 </p>

@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Upload as UploadIcon, Loader2 } from "lucide-react";
+import { Camera, Upload as UploadIcon, Loader2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Tesseract from "tesseract.js";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Upload = () => {
   const navigate = useNavigate();
@@ -218,7 +219,17 @@ const Upload = () => {
             <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
               <Loader2 className="w-5 h-5 animate-spin" />
               <div className="flex-1">
-                <p className="text-sm font-medium">Extracting ingredients...</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">Extracting ingredients...</p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>Our AI is reading the text from your image. Review the results carefully as OCR may occasionally misread handwriting or small text.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <p className="text-xs text-muted-foreground">{ocrProgress}% complete</p>
               </div>
             </div>
@@ -267,7 +278,17 @@ const Upload = () => {
             </div>
 
             <div>
-              <Label htmlFor="ingredients">Ingredients List</Label>
+              <div className="flex items-center gap-2 mb-2">
+                <Label htmlFor="ingredients">Ingredients List</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>Upload a photo of your product's ingredient list or type it manually. We'll extract and analyze each ingredient for safety and compatibility with your skin profile.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <Textarea
                 id="ingredients"
                 value={ingredientsList}

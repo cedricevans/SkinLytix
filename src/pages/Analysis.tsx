@@ -5,8 +5,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle2, Sparkles, Home, ScanLine, Database, Users, Plus } from "lucide-react";
+import { AlertCircle, CheckCircle2, Sparkles, Home, ScanLine, Database, Users, Plus, Info } from "lucide-react";
 import PostAnalysisFeedback from "@/components/PostAnalysisFeedback";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AnalysisData {
   id: string;
@@ -288,7 +289,17 @@ const Analysis = () => {
         </div>
 
         <Card className="p-8 mb-8 text-center bg-gradient-to-br from-primary/5 to-accent/5">
-          <h2 className="text-2xl font-semibold mb-4">EpiQ Score</h2>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <h2 className="text-2xl font-semibold">EpiQ Score</h2>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-sm">
+                <p>Your EpiQ Score (0-100) reflects how safe and effective this product is based on ingredient analysis, scientific research, and your personal skin profile. Higher scores = better match for your skin.</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
           <div className={`text-7xl font-bold mb-4 ${getScoreColor(analysis.epiq_score)}`}>
             {analysis.epiq_score}
           </div>
@@ -308,7 +319,17 @@ const Analysis = () => {
                   <Database className="w-6 h-6 text-accent" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold mb-1">Help the Community! 🌟</h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-lg font-semibold">Help the Community! 🌟</h3>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p>By adding this product to our community database, you help other users discover it faster. Products verified by multiple users get a trust badge!</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <p className="text-sm text-muted-foreground mb-3">
                     Be the first to add <strong>{analysis.product_name}</strong> to our database. 
                     Your contribution helps others discover safer products.
@@ -349,8 +370,18 @@ const Analysis = () => {
           <Card className="p-6 mb-8 bg-primary/5 border-primary/20">
             <div className="flex items-center gap-3">
               <Sparkles className="w-6 h-6 text-primary" />
-              <div>
-                <h3 className="font-semibold">Personalized for Your Skin</h3>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold">Personalized for Your Skin</h3>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>This analysis considers your skin type, concerns, and sensitivities from your profile. Update your profile in settings for more accurate recommendations.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   This analysis is customized based on your skin type and concerns
                 </p>
@@ -381,8 +412,18 @@ const Analysis = () => {
         <Card className="p-6 mb-8">
           <div className="flex items-center gap-3 mb-4">
             <CheckCircle2 className="w-8 h-8 text-green-500" />
-            <div>
-              <h2 className="text-2xl font-bold">Safe Ingredients</h2>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold">Safe Ingredients</h2>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>These ingredients are well-documented in scientific databases like PubChem and Open Beauty Facts. They're recognized as safe and effective for most skin types.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <p className="text-sm text-muted-foreground">These ingredients are recognized and documented</p>
             </div>
           </div>
@@ -403,8 +444,18 @@ const Analysis = () => {
           <Card className="p-6 mb-8">
             <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="w-8 h-8 text-yellow-500" />
-              <div>
-                <h2 className="text-2xl font-bold">Ingredients Needing Attention</h2>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-bold">Ingredients Needing Attention</h2>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>These ingredients weren't found in our databases. This doesn't mean they're unsafe—just that we recommend researching them independently or consulting a dermatologist.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Not found in our database - research recommended
                 </p>

@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Sparkles, DollarSign, AlertTriangle, Pencil, Trash2 } from "lucide-react";
+import { Plus, Sparkles, DollarSign, AlertTriangle, Pencil, Trash2, Info } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Analysis {
   id: string;
@@ -346,18 +347,38 @@ export default function Routine() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button
-                  onClick={handleOptimizeRoutine}
-                  disabled={optimizing}
-                  className="bg-primary"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  {optimizing ? "Optimizing..." : "Optimize Routine"}
-                </Button>
-                <Button variant="outline" onClick={handleCostAnalysis}>
-                  <DollarSign className="w-4 h-4 mr-2" />
-                  Cost Analysis
-                </Button>
+                <div className="flex items-center">
+                  <Button
+                    onClick={handleOptimizeRoutine}
+                    disabled={optimizing}
+                    className="bg-primary"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    {optimizing ? "Optimizing..." : "Optimize Routine"}
+                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 ml-2 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>Our AI analyzes your routine for ingredient conflicts, redundancies, and cost-saving opportunities. Optimize after adding 2+ products for best results.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <div className="flex items-center">
+                  <Button variant="outline" onClick={handleCostAnalysis}>
+                    <DollarSign className="w-4 h-4 mr-2" />
+                    Cost Analysis
+                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 ml-2 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>View detailed breakdown of your routine costs and discover budget-friendly alternatives that maintain the same key ingredients.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
             </div>
           </Card>
@@ -394,9 +415,19 @@ export default function Routine() {
                         )}
                         {rp.user_analyses.epiq_score !== null && (
                           <>
-                            <span className="text-sm text-muted-foreground">
-                              EpiQ: {rp.user_analyses.epiq_score}
-                            </span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-sm text-muted-foreground">
+                                EpiQ: {rp.user_analyses.epiq_score}
+                              </span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="w-3 h-3 text-muted-foreground cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs">
+                                  <p>This product's safety and effectiveness score (0-100) based on ingredient analysis and your skin profile.</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
                             <span className="text-sm text-muted-foreground">•</span>
                           </>
                         )}
@@ -478,7 +509,17 @@ export default function Routine() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
-                <Label htmlFor="price">Product Price ($)</Label>
+                <div className="flex items-center gap-2 mb-2">
+                  <Label htmlFor="price">Product Price ($)</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>Enter the product price to track your routine costs and get personalized budget-friendly alternatives during optimization.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <Input
                   id="price"
                   type="number"
@@ -489,7 +530,17 @@ export default function Routine() {
                 />
               </div>
               <div>
-                <Label htmlFor="frequency">Usage Frequency</Label>
+                <div className="flex items-center gap-2 mb-2">
+                  <Label htmlFor="frequency">Usage Frequency</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>Select when you use this product: Morning (AM), Evening (PM), or Both. This helps our AI detect conflicts between products used at the same time.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <select
                   id="frequency"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
