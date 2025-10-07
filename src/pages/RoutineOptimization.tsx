@@ -31,6 +31,7 @@ interface OptimizationData {
     suggestedAlternative: string;
     alternativePrice: number;
     potentialSavings: number;
+    skinBenefits?: string;
   }>;
   routineEfficiency: {
     canEliminate: string[];
@@ -247,7 +248,7 @@ export default function RoutineOptimization() {
                       <Info className="w-4 h-4 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs">
-                      <p>These alternatives contain the same key active ingredients at lower prices. Switching could save you money without sacrificing results.</p>
+                      <p>These alternatives are personalized for your skin type and concerns. They contain similar or better active ingredients at lower prices, and are specifically chosen to work better for your unique skin needs.</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -294,6 +295,14 @@ export default function RoutineOptimization() {
                   <p className="text-sm">
                     <strong>Alternative:</strong> {item.suggestedAlternative}
                   </p>
+                  {item.skinBenefits && (
+                    <div className="mt-3 bg-primary/5 p-3 rounded-md border border-primary/10">
+                      <p className="text-xs font-semibold text-primary mb-1">
+                        Better for Your Skin
+                      </p>
+                      <p className="text-sm">{item.skinBenefits}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

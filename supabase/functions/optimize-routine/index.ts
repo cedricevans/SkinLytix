@@ -21,6 +21,24 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Get routine with user info
+    const { data: routine, error: routineError } = await supabase
+      .from('routines')
+      .select('user_id')
+      .eq('id', routineId)
+      .single();
+
+    if (routineError) throw routineError;
+
+    // Get user profile data
+    const { data: userProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('skin_type, skin_concerns')
+      .eq('id', routine.user_id)
+      .single();
+
+    if (profileError) throw profileError;
+
     // Get routine products with full analysis data
     const { data: routineProducts, error: rpError } = await supabase
       .from('routine_products')
@@ -54,7 +72,12 @@ serve(async (req) => {
     }));
 
     // Call Lovable AI for routine optimization
+    const skinConcerns = userProfile?.skin_concerns || [];
     const aiPrompt = `You are a skincare routine optimization expert. Analyze this skincare routine and provide detailed insights:
+
+USER SKIN PROFILE:
+- Skin Type: ${userProfile?.skin_type || 'unknown'}
+- Skin Concerns: ${Array.isArray(skinConcerns) ? skinConcerns.join(', ') : 'none specified'}
 
 PRODUCTS IN ROUTINE:
 ${productsData.map((p, i) => `
@@ -71,7 +94,11 @@ Provide a comprehensive analysis covering:
 1. INGREDIENT REDUNDANCIES: Identify duplicate active ingredients across products with specific percentages/concentrations
 2. CONFLICTING ACTIVES: Flag combinations that may cause irritation or reduce effectiveness
 3. FORMULATION ISSUES: Point out problematic ingredients like high fragrance content, lack of stabilizers
-4. COST OPTIMIZATION: Suggest more cost-effective alternatives that provide the same key ingredients with NUMERIC savings
+4. COST OPTIMIZATION: Suggest alternatives that are:
+   - Better suited for ${userProfile?.skin_type || 'their'} skin type
+   - Address their specific concerns: ${Array.isArray(skinConcerns) ? skinConcerns.join(', ') : 'general skin health'}
+   - More cost-effective with NUMERIC savings
+   - Contain similar or better active ingredients
 5. ROUTINE EFFICIENCY: Recommend which products could be eliminated without losing benefits
 
 Format your response as a structured JSON with these sections:
@@ -85,7 +112,8 @@ Format your response as a structured JSON with these sections:
     "keyIngredients": [], 
     "suggestedAlternative": "", 
     "alternativePrice": 25.00,
-    "potentialSavings": 20.00
+    "potentialSavings": 20.00,
+    "skinBenefits": "Explain why this alternative is better for their specific skin type and concerns"
   }],
   "routineEfficiency": { "canEliminate": [], "reasoning": "" },
   "overallScore": 85,
