@@ -61,19 +61,19 @@ const WaitlistDialog = ({ open, onOpenChange }: WaitlistDialogProps) => {
 
       if (error) {
         if (error.code === "23505") {
-          toast({
-            title: "Already on the waitlist",
-            description: "This email is already registered. We'll notify you when beta access is ready!",
-            variant: "default",
-          });
+        toast({
+          title: "Already on the waitlist",
+          description: "This email is already registered. We will let you know when we go live!",
+          variant: "default",
+        });
         } else {
           throw error;
         }
       } else {
-        toast({
-          title: "Welcome to the waitlist! 🎉",
-          description: "We'll notify you as soon as beta access opens.",
-        });
+      toast({
+        title: "Thank you for joining our waitlist!",
+        description: "We will let you know when we go live.",
+      });
         reset();
         onOpenChange(false);
       }
