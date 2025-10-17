@@ -1,12 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import WaitlistDialog from "@/components/WaitlistDialog";
 
 const CTASection = () => {
   const navigate = useNavigate();
-  const [waitlistDialogOpen, setWaitlistDialogOpen] = useState(false);
 
   return (
     <section id="cta-section" className="py-12 md:py-24 px-4 md:px-6 bg-gradient-hero relative overflow-hidden">
@@ -20,7 +17,7 @@ const CTASection = () => {
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/20 rounded-full mb-6 animate-fade-in-up">
           <Sparkles className="w-4 h-4 text-primary-foreground" />
           <span className="text-sm font-subheading font-medium text-primary-foreground">
-            Beta Access is Live
+            Free Beta - Sign Up Today
           </span>
         </div>
 
@@ -29,7 +26,7 @@ const CTASection = () => {
         </h2>
 
         <p className="text-lg md:text-xl font-subheading text-primary-foreground/90 mb-8 md:mb-10 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-          Join beauty enthusiasts who analyze before they buy. Free during beta—help us build the tool you've always needed.
+          Join beauty enthusiasts who analyze before they buy. Start analyzing your products for free—no waiting, no credit card required.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
@@ -37,9 +34,9 @@ const CTASection = () => {
             variant="cta" 
             size="lg" 
             className="text-base px-8 py-5 md:py-6 h-auto w-full sm:w-auto bg-cta hover:bg-cta/90"
-            onClick={() => setWaitlistDialogOpen(true)}
+            onClick={() => navigate('/auth')}
           >
-            Join our Community
+            Get Started Free
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
           <Button
@@ -53,12 +50,9 @@ const CTASection = () => {
         </div>
 
         <p className="mt-8 text-sm font-body text-primary-foreground/70 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
-          No credit card required • Free API access • Help shape the future of skincare intelligence
+          No credit card required • Instant access • Free during beta
         </p>
       </div>
-
-      {/* Waitlist Dialog */}
-      <WaitlistDialog open={waitlistDialogOpen} onOpenChange={setWaitlistDialogOpen} />
     </section>
   );
 };

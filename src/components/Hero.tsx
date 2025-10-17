@@ -39,7 +39,7 @@ const Hero = () => {
         >
           <Sparkles className="w-4 h-4 text-success-foreground" />
           <span className="text-sm font-subheading font-medium text-success-foreground">
-            Beta Access is Live
+            Now Open - Free Beta Access
           </span>
         </button>
 
@@ -55,7 +55,7 @@ const Hero = () => {
         {/* Subheadline */}
         <p className="text-lg md:text-2xl font-subheading text-muted-foreground max-w-3xl mx-auto mb-8 md:mb-12 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           70% of shoppers find ingredient lists confusing. SkinLytix decodes them instantly, 
-          optimizes your routine, and helps you stop wasting money on products that don't work together.
+          optimizes your routine, and helps you stop wasting money on products that don't work together. Get started free today.
         </p>
 
         {/* CTA Buttons */}
@@ -83,7 +83,7 @@ const Hero = () => {
 
         {/* Social Proof */}
         <p className="mt-12 text-sm font-body text-muted-foreground animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
-          Trusted by beauty enthusiasts who refuse to waste money on trial and error
+          Join hundreds of beauty enthusiasts making smarter skincare decisions
         </p>
         </div>
       </div>
