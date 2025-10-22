@@ -401,6 +401,42 @@ export type Database = {
           },
         ]
       }
+      user_events: {
+        Row: {
+          created_at: string
+          event_category: string
+          event_name: string
+          event_properties: Json | null
+          id: string
+          page_url: string | null
+          referrer: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_category: string
+          event_name: string
+          event_properties?: Json | null
+          id?: string
+          page_url?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_category?: string
+          event_name?: string
+          event_properties?: Json | null
+          id?: string
+          page_url?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       waitlist: {
         Row: {
           created_at: string
@@ -436,6 +472,22 @@ export type Database = {
       }
     }
     Views: {
+      analytics_daily_active_users: {
+        Row: {
+          active_users: number | null
+          date: string | null
+        }
+        Relationships: []
+      }
+      analytics_feature_adoption: {
+        Row: {
+          event_category: string | null
+          event_count: number | null
+          event_name: string | null
+          unique_users: number | null
+        }
+        Relationships: []
+      }
       rate_limit_abuse_alerts: {
         Row: {
           endpoint: string | null
