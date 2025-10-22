@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Plus, Sparkles, DollarSign, AlertTriangle, Pencil, Trash2, Info, Home, ArrowLeft, User } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { useTracking, trackEvent } from "@/hooks/useTracking";
 
 interface Analysis {
   id: string;
@@ -34,6 +35,7 @@ interface RoutineProduct {
 
 export default function Routine() {
   const navigate = useNavigate();
+  useTracking('routine');
   const [routineName, setRoutineName] = useState("My Skincare Routine");
   const [routineId, setRoutineId] = useState<string | null>(null);
   const [routineProducts, setRoutineProducts] = useState<RoutineProduct[]>([]);
@@ -199,6 +201,16 @@ export default function Routine() {
           });
 
         if (error) throw error;
+        
+        trackEvent({
+          eventName: 'product_added_to_routine',
+          eventCategory: 'routine',
+          eventProperties: { 
+            usageFrequency,
+            hasPrice: price > 0
+          }
+        });
+        
         toast.success("Product added to routine");
       }
 
@@ -277,6 +289,15 @@ export default function Routine() {
       });
 
       if (error) throw error;
+
+      trackEvent({
+        eventName: 'routine_optimized',
+        eventCategory: 'routine',
+        eventProperties: { 
+          productCount: routineProducts.length,
+          totalCost
+        }
+      });
 
       toast.success("Routine optimized!");
       navigate(`/routine/optimization/${data.optimizationId}`);

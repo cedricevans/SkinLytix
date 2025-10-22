@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Droplets, Wind, Flame, Shield, Sparkles, User, Shirt, Scissors } from "lucide-react";
+import { useTracking, trackEvent } from "@/hooks/useTracking";
 
 const faceSkinTypes = [
   { value: "oily", label: "Oily", icon: Droplets, description: "Shiny, prone to breakouts" },
@@ -61,6 +62,7 @@ const hairConcerns = [
 const Onboarding = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  useTracking('onboarding');
   const [step, setStep] = useState(0);
   
   // Step 0: Product preferences
@@ -138,6 +140,18 @@ const Onboarding = () => {
         .eq("id", user.id);
 
       if (error) throw error;
+
+      trackEvent({
+        eventName: 'onboarding_completed',
+        eventCategory: 'onboarding',
+        eventProperties: { 
+          productPreferences,
+          faceSkinType,
+          bodySkinType,
+          scalpType,
+          totalConcerns: allConcerns.length
+        }
+      });
 
       toast({
         title: "Profile Complete! 🎉",
@@ -236,7 +250,14 @@ const Onboarding = () => {
 
             <div className="flex justify-end pt-4">
               <Button
-                onClick={() => setStep(1)}
+                onClick={() => {
+                  trackEvent({
+                    eventName: 'onboarding_step_0_completed',
+                    eventCategory: 'onboarding',
+                    eventProperties: { productPreferences }
+                  });
+                  setStep(1);
+                }}
                 disabled={!canProceedFromStep(0)}
                 size="lg"
               >
@@ -324,7 +345,14 @@ const Onboarding = () => {
                 Back
               </Button>
               <Button
-                onClick={() => setStep(2)}
+                onClick={() => {
+                  trackEvent({
+                    eventName: 'onboarding_step_1_completed',
+                    eventCategory: 'onboarding',
+                    eventProperties: { faceSkinType, bodySkinType, scalpType }
+                  });
+                  setStep(2);
+                }}
                 disabled={!canProceedFromStep(1)}
                 size="lg"
               >

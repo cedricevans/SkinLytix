@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Droplets, Wind, Flame, Shield, Sparkles, Home, ArrowLeft, User, TrendingUp, Calendar, DollarSign, Edit2 } from "lucide-react";
+import { useTracking, trackEvent } from "@/hooks/useTracking";
 
 const skinTypes = [
   { value: "oily", label: "Oily", icon: Droplets, description: "Shiny, prone to breakouts" },
@@ -38,6 +39,7 @@ interface ProfileStats {
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  useTracking('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [skinType, setSkinType] = useState<"oily" | "dry" | "combination" | "sensitive" | "normal" | "">("");
   const [selectedConcerns, setSelectedConcerns] = useState<string[]>([]);
@@ -183,6 +185,15 @@ const Profile = () => {
         .eq("id", user.id);
 
       if (error) throw error;
+
+      trackEvent({
+        eventName: 'profile_updated',
+        eventCategory: 'profile',
+        eventProperties: {
+          skinType,
+          concernsCount: selectedConcerns.length
+        }
+      });
 
       toast({
         title: "Profile Updated! ✓",

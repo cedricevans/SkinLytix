@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle2, Sparkles, Home, ScanLine, Database, Users, Plus, Info } from "lucide-react";
 import PostAnalysisFeedback from "@/components/PostAnalysisFeedback";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { useTracking, trackEvent } from "@/hooks/useTracking";
 
 interface AnalysisData {
   id: string;
@@ -44,6 +45,7 @@ const Analysis = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  useTracking('analysis');
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -142,6 +144,15 @@ const Analysis = () => {
       });
 
       setSavedToDb(true);
+      
+      trackEvent({
+        eventName: 'product_saved_to_database',
+        eventCategory: 'analysis',
+        eventProperties: {
+          isNew: result.is_new,
+          verificationCount: result.verification_count
+        }
+      });
     } catch (error: any) {
       console.error('Error saving product:', error);
       toast({
@@ -199,6 +210,14 @@ const Analysis = () => {
         });
 
       if (error) throw error;
+
+      trackEvent({
+        eventName: 'product_added_to_routine_from_analysis',
+        eventCategory: 'analysis',
+        eventProperties: {
+          epiq_score: analysis?.epiq_score
+        }
+      });
 
       toast({
         title: "Added to routine!",

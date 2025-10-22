@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Tesseract from "tesseract.js";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
+import { useTracking, trackEvent } from "@/hooks/useTracking";
 
 // Helper: Preprocess image for better OCR accuracy
 const preprocessImage = (imageDataUrl: string): Promise<string> => {
@@ -55,6 +56,7 @@ const cleanIngredientText = (text: string): string => {
 const Upload = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  useTracking('upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [productImage, setProductImage] = useState<string | null>(null);
@@ -70,6 +72,15 @@ const Upload = () => {
   const [productType, setProductType] = useState<'face' | 'body' | 'hair' | 'auto'>('auto');
 
   const handleImageUpload = async (file: File) => {
+    trackEvent({
+      eventName: 'image_uploaded',
+      eventCategory: 'upload',
+      eventProperties: { 
+        useAIExtraction,
+        productType 
+      }
+    });
+
     const reader = new FileReader();
     reader.onload = async (e) => {
       const imageDataUrl = e.target?.result as string;
@@ -237,6 +248,17 @@ const Upload = () => {
       });
 
       if (error) throw error;
+
+      trackEvent({
+        eventName: 'product_analyzed',
+        eventCategory: 'upload',
+        eventProperties: {
+          epiq_score: data.epiq_score,
+          productType,
+          hasBarcode: !!barcode,
+          hasBrand: !!brand
+        }
+      });
 
       toast({
         title: "Analysis Complete!",
