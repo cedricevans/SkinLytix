@@ -277,16 +277,21 @@ const Analysis = () => {
             <Home className="w-4 h-4 mr-2" />
             Back to Home
           </Button>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={handleAddToRoutine}
               disabled={addingToRoutine}
+              className="touch-target w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               {addingToRoutine ? "Adding..." : "Add to Routine"}
             </Button>
-            <Button variant="outline" onClick={() => navigate('/upload')}>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/upload')}
+              className="touch-target w-full sm:w-auto"
+            >
               <ScanLine className="w-4 h-4 mr-2" />
               Analyze Another
             </Button>

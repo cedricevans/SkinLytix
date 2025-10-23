@@ -61,11 +61,11 @@ const Hero = () => {
         </p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-stretch sm:items-center animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
           <Button 
             variant="cta" 
             size="lg" 
-            className="text-base px-8 py-5 md:py-6 h-auto w-full sm:w-auto"
+            className="touch-target text-base px-8 py-5 md:py-6 h-auto w-full sm:w-auto"
             onClick={() => navigate('/auth')}
           >
             Start Your First Analysis
@@ -74,7 +74,7 @@ const Hero = () => {
           <Button 
             variant="outline" 
             size="lg" 
-            className="text-base px-8 py-5 md:py-6 h-auto w-full sm:w-auto border-primary/30 hover:border-primary"
+            className="touch-target text-base px-8 py-5 md:py-6 h-auto w-full sm:w-auto border-primary/30 hover:border-primary"
             onClick={() => {
               document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
             }}

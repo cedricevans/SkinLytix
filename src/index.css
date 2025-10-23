@@ -121,6 +121,13 @@ All colors MUST be HSL.
   }
 }
 
+/* Custom Utilities */
+@layer utilities {
+  .touch-target {
+    @apply min-h-[44px];
+  }
+}
+
 /* Custom Animations */
 @keyframes fade-in-up {
   from {

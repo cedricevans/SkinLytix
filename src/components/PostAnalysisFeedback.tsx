@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/hooks/useTracking";
+import FeedbackDialog from "./FeedbackDialog";
 
 interface PostAnalysisFeedbackProps {
   analysisId: string;
@@ -11,8 +11,7 @@ interface PostAnalysisFeedbackProps {
 
 const PostAnalysisFeedback = ({ analysisId }: PostAnalysisFeedbackProps) => {
   const [rating, setRating] = useState<number | null>(null);
-  const [showFollowUp, setShowFollowUp] = useState(false);
-  const [followUpMessage, setFollowUpMessage] = useState("");
+  const [showDialog, setShowDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const { toast } = useToast();
@@ -20,26 +19,47 @@ const PostAnalysisFeedback = ({ analysisId }: PostAnalysisFeedbackProps) => {
   const handleRating = async (value: number) => {
     setRating(value);
     
-    // Show follow-up for ratings 1-3 (negative/neutral)
+    // Track rating selection
+    trackEvent({
+      eventName: 'analysis_rating_selected',
+      eventCategory: 'feedback',
+      eventProperties: { rating: value }
+    });
+    
+    // Show dialog for ratings 1-3 (negative/neutral)
     if (value <= 3) {
-      setShowFollowUp(true);
+      setShowDialog(true);
+      trackEvent({
+        eventName: 'feedback_dialog_opened',
+        eventCategory: 'feedback',
+        eventProperties: { rating: value }
+      });
       return;
     }
 
     // Submit immediately for positive ratings (4-5)
-    await submitFeedback(value, "");
+    await submitFeedback(value, [], "");
   };
 
-  const submitFeedback = async (ratingValue: number, message: string) => {
+  const submitFeedback = async (
+    ratingValue: number,
+    selectedIssues: string[],
+    message: string
+  ) => {
     setIsSubmitting(true);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
+      // Format feedback message with structured data
+      const formattedMessage = selectedIssues.length > 0
+        ? `Issues: [${selectedIssues.join(", ")}] | Comment: ${message.trim() || "No additional comments"}`
+        : message.trim() || "No additional comments";
+      
       const { error } = await supabase.from("feedback").insert({
         user_id: user?.id || null,
         feedback_type: "analysis_rating",
-        message: message.trim() || "No additional comments",
+        message: formattedMessage,
         rating: ratingValue,
         context_type: "analysis",
         context_id: analysisId,
@@ -48,12 +68,24 @@ const PostAnalysisFeedback = ({ analysisId }: PostAnalysisFeedbackProps) => {
 
       if (error) throw error;
 
+      // Track successful submission
+      trackEvent({
+        eventName: 'feedback_submitted',
+        eventCategory: 'feedback',
+        eventProperties: {
+          rating: ratingValue,
+          issuesCount: selectedIssues.length,
+          hasComment: !!message.trim()
+        }
+      });
+
       toast({
         title: "Thank you!",
         description: "Your feedback helps us improve.",
       });
 
       setHasSubmitted(true);
+      setShowDialog(false);
     } catch (error) {
       console.error("Error submitting feedback:", error);
       toast({
@@ -66,9 +98,21 @@ const PostAnalysisFeedback = ({ analysisId }: PostAnalysisFeedbackProps) => {
     }
   };
 
-  const handleFollowUpSubmit = async () => {
+  const handleDialogSubmit = async (selectedIssues: string[], detailedMessage: string) => {
     if (rating === null) return;
-    await submitFeedback(rating, followUpMessage);
+    await submitFeedback(rating, selectedIssues, detailedMessage);
+  };
+
+  const handleDialogSkip = async () => {
+    if (rating === null) return;
+    
+    trackEvent({
+      eventName: 'feedback_skipped',
+      eventCategory: 'feedback',
+      eventProperties: { rating }
+    });
+    
+    await submitFeedback(rating, [], "");
   };
 
   if (hasSubmitted) {
@@ -82,10 +126,10 @@ const PostAnalysisFeedback = ({ analysisId }: PostAnalysisFeedbackProps) => {
   }
 
   return (
-    <div className="mt-8 p-6 bg-muted/50 rounded-lg border border-border">
-      <h3 className="text-lg font-semibold mb-4">Was this analysis helpful?</h3>
-      
-      {!showFollowUp ? (
+    <>
+      <div className="mt-8 p-6 bg-muted/50 rounded-lg border border-border">
+        <h3 className="text-lg font-semibold mb-4">Was this analysis helpful?</h3>
+        
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground text-center">
             Rate your experience (1 = Poor, 5 = Excellent)
@@ -96,7 +140,7 @@ const PostAnalysisFeedback = ({ analysisId }: PostAnalysisFeedbackProps) => {
                 key={starValue}
                 onClick={() => handleRating(starValue)}
                 disabled={isSubmitting || rating !== null}
-                className="transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                className="touch-target transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
                 aria-label={`Rate ${starValue} stars`}
               >
                 <Star
@@ -110,41 +154,17 @@ const PostAnalysisFeedback = ({ analysisId }: PostAnalysisFeedbackProps) => {
             ))}
           </div>
         </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="follow-up" className="text-sm font-medium">
-              What could we improve? (Optional)
-            </label>
-            <Textarea
-              id="follow-up"
-              placeholder="Tell us more about your experience..."
-              value={followUpMessage}
-              onChange={(e) => setFollowUpMessage(e.target.value)}
-              className="min-h-[100px] resize-none"
-              disabled={isSubmitting}
-            />
-          </div>
-          
-          <div className="flex gap-3">
-            <Button 
-              onClick={handleFollowUpSubmit}
-              disabled={isSubmitting}
-              className="flex-1"
-            >
-              {isSubmitting ? "Submitting..." : "Submit Feedback"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => submitFeedback(rating!, "")}
-              disabled={isSubmitting}
-            >
-              Skip
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
+      </div>
+
+      <FeedbackDialog
+        open={showDialog}
+        rating={rating || 1}
+        onClose={() => setShowDialog(false)}
+        onSubmit={handleDialogSubmit}
+        onSkip={handleDialogSkip}
+        isSubmitting={isSubmitting}
+      />
+    </>
   );
 };
 
