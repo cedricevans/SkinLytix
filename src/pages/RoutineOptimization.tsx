@@ -4,25 +4,35 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, AlertTriangle, TrendingDown, DollarSign, CheckCircle, Info } from "lucide-react";
+import { ArrowLeft, AlertTriangle, TrendingDown, DollarSign, CheckCircle, Info, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 interface OptimizationData {
+  routineType?: string;
+  productCounts?: {
+    face: number;
+    body: number;
+    hair: number;
+    unknown: number;
+  };
   redundancies: Array<{
     ingredient: string;
     products: string[];
     recommendation: string;
+    category?: string;
   }>;
   conflicts: Array<{
     actives: string[];
     risk: string;
     suggestion: string;
+    category?: string;
   }>;
   formulationIssues: Array<{
     product: string;
     issue: string;
     impact: string;
+    category?: string;
   }>;
   costOptimizations: Array<{
     product: string;
@@ -32,11 +42,18 @@ interface OptimizationData {
     alternativePrice: number;
     potentialSavings: number;
     skinBenefits?: string;
+    category?: string;
   }>;
   routineEfficiency: {
     canEliminate: string[];
     reasoning: string;
+    category?: string;
   };
+  outOfScope?: Array<{
+    product: string;
+    reason: string;
+    suggestion: string;
+  }>;
   overallScore: number;
   summary: string;
   totalRoutineCost: number;
@@ -88,6 +105,20 @@ export default function RoutineOptimization() {
     );
   }
 
+  const getCategoryBadge = (category?: string) => {
+    if (!category) return null;
+    const colors = {
+      face: 'bg-primary/10 text-primary',
+      body: 'bg-secondary/10 text-secondary',
+      hair: 'bg-accent/10 text-accent'
+    };
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colors[category as keyof typeof colors] || 'bg-muted text-muted-foreground'}`}>
+        {category.charAt(0).toUpperCase() + category.slice(1)}
+      </span>
+    );
+  };
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
@@ -105,7 +136,14 @@ export default function RoutineOptimization() {
         <Card className="p-6 mb-6 bg-gradient-to-br from-primary/10 to-primary/5">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <h1 className="text-3xl font-bold">Routine Optimization Score</h1>
+              <h1 className="text-3xl font-bold">
+                Routine Optimization Score
+                {data.routineType && data.routineType !== 'face' && (
+                  <span className="text-base font-normal text-muted-foreground ml-2">
+                    ({data.routineType === 'mixed' ? 'Mixed Routine' : `${data.routineType.charAt(0).toUpperCase() + data.routineType.slice(1)} Care`})
+                  </span>
+                )}
+              </h1>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Info className="w-4 h-4 text-muted-foreground cursor-help" />
@@ -119,11 +157,54 @@ export default function RoutineOptimization() {
               {data.overallScore}
             </div>
             <p className="text-muted-foreground">{data.summary}</p>
+            {data.productCounts && data.routineType === 'mixed' && (
+              <div className="mt-4 flex gap-2 flex-wrap justify-center">
+                {data.productCounts.face > 0 && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary">
+                    {data.productCounts.face} Face
+                  </span>
+                )}
+                {data.productCounts.body > 0 && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-secondary/10 text-secondary">
+                    {data.productCounts.body} Body
+                  </span>
+                )}
+                {data.productCounts.hair > 0 && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-accent/10 text-accent">
+                    {data.productCounts.hair} Hair
+                  </span>
+                )}
+              </div>
+            )}
             <p className="text-sm text-muted-foreground mt-2">
               Total Routine Cost: ${data.totalRoutineCost?.toFixed(2) || "0.00"}
             </p>
           </div>
         </Card>
+
+        {/* Out of Scope Products */}
+        {data.outOfScope && data.outOfScope.length > 0 && (
+          <Card className="p-6 mb-6 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800">
+            <div className="flex items-start gap-3 mb-4">
+              <AlertCircle className="w-5 h-5 text-amber-600 mt-1" />
+              <div className="flex-1">
+                <h2 className="text-xl font-bold">Out of Scope Products</h2>
+                <p className="text-sm text-muted-foreground">
+                  These products don't match your profile preferences or have unclear categories
+                </p>
+              </div>
+            </div>
+            <div className="space-y-4">
+              {data.outOfScope.map((item, idx) => (
+                <div key={idx} className="border-l-2 border-amber-500 pl-4">
+                  <h3 className="font-semibold mb-2">{item.product}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">{item.reason}</p>
+                  <p className="text-sm text-primary font-medium">{item.suggestion}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Redundancies */}
         {data.redundancies && data.redundancies.length > 0 && (
@@ -150,7 +231,10 @@ export default function RoutineOptimization() {
             <div className="space-y-4">
               {data.redundancies.map((item, idx) => (
                 <div key={idx} className="border-l-2 border-orange-500 pl-4">
-                  <h3 className="font-semibold">{item.ingredient}</h3>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="font-semibold">{item.ingredient}</h3>
+                    {getCategoryBadge(item.category)}
+                  </div>
                   <p className="text-sm text-muted-foreground mb-2">
                     Found in: {item.products.join(", ")}
                   </p>
@@ -186,12 +270,15 @@ export default function RoutineOptimization() {
             <div className="space-y-4">
               {data.conflicts.map((item, idx) => (
                 <div key={idx} className="border-l-2 border-red-500 pl-4">
-                  <div className="flex gap-2 mb-2">
-                    {item.actives.map((active, i) => (
-                      <Badge key={i} variant="destructive">
-                        {active}
-                      </Badge>
-                    ))}
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex gap-2 flex-wrap">
+                      {item.actives.map((active, i) => (
+                        <Badge key={i} variant="destructive">
+                          {active}
+                        </Badge>
+                      ))}
+                    </div>
+                    {getCategoryBadge(item.category)}
                   </div>
                   <p className="text-sm font-semibold mb-1">Risk: {item.risk}</p>
                   <p className="text-sm">{item.suggestion}</p>
@@ -226,7 +313,10 @@ export default function RoutineOptimization() {
             <div className="space-y-4">
               {data.formulationIssues.map((item, idx) => (
                 <div key={idx} className="border-l-2 border-yellow-500 pl-4">
-                  <h3 className="font-semibold">{item.product}</h3>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="font-semibold">{item.product}</h3>
+                    {getCategoryBadge(item.category)}
+                  </div>
                   <p className="text-sm text-muted-foreground mb-1">{item.issue}</p>
                   <p className="text-sm">{item.impact}</p>
                 </div>
@@ -268,7 +358,10 @@ export default function RoutineOptimization() {
             <div className="space-y-4">
               {data.costOptimizations.map((item, idx) => (
                 <div key={idx} className="border-l-2 border-green-500 pl-4">
-                  <h3 className="font-semibold">{item.product}</h3>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="font-semibold">{item.product}</h3>
+                    {getCategoryBadge(item.category)}
+                  </div>
                   <p className="text-sm text-muted-foreground mb-2">
                     Key ingredients: {item.keyIngredients.join(", ")}
                   </p>

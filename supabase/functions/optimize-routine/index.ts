@@ -30,10 +30,10 @@ serve(async (req) => {
 
     if (routineError) throw routineError;
 
-    // Get user profile data
+    // Get user profile data - fetch ALL profile fields for multi-type analysis
     const { data: userProfile, error: profileError } = await supabase
       .from('profiles')
-      .select('skin_type, skin_concerns')
+      .select('skin_type, skin_concerns, body_concerns, scalp_type, product_preferences')
       .eq('id', routine.user_id)
       .single();
 
@@ -60,7 +60,38 @@ serve(async (req) => {
       throw new Error('No products found in routine');
     }
 
-    // Prepare product data for AI analysis
+    // Helper function to categorize products
+    const categorizeProduct = (product: any): 'face' | 'body' | 'hair' | 'unknown' => {
+      const category = product.category?.toLowerCase() || '';
+      const name = product.product_name?.toLowerCase() || '';
+      
+      // Face categories
+      if (category.includes('face') || category.includes('serum') || category.includes('moisturizer') || 
+          category.includes('cleanser') || category.includes('sunscreen') || category.includes('toner') ||
+          category.includes('eye') || category.includes('mask') ||
+          name.includes('face') || name.includes('serum') || name.includes('moisturizer')) {
+        return 'face';
+      }
+      
+      // Body categories
+      if (category.includes('body') || category.includes('deodorant') || category.includes('lotion') ||
+          category.includes('hand') || category.includes('foot') || category.includes('scrub') ||
+          name.includes('body') || name.includes('deodorant') || name.includes('hand cream') || 
+          name.includes('body lotion')) {
+        return 'body';
+      }
+      
+      // Hair categories
+      if (category.includes('hair') || category.includes('shampoo') || category.includes('conditioner') ||
+          category.includes('scalp') || name.includes('shampoo') || name.includes('conditioner') ||
+          name.includes('hair')) {
+        return 'hair';
+      }
+      
+      return 'unknown';
+    };
+
+    // Prepare product data and categorize
     const productsData = routineProducts.map(rp => ({
       name: rp.user_analyses.product_name,
       brand: rp.user_analyses.brand,
@@ -69,18 +100,34 @@ serve(async (req) => {
       price: rp.product_price,
       frequency: rp.usage_frequency,
       epiqScore: rp.user_analyses.epiq_score,
+      productType: categorizeProduct(rp.user_analyses),
     }));
 
-    // Call Lovable AI for routine optimization
-    const skinConcerns = userProfile?.skin_concerns || [];
-    const aiPrompt = `You are a skincare routine optimization expert. Analyze this skincare routine and provide detailed insights:
+    // Group products by type
+    const faceProducts = productsData.filter(p => p.productType === 'face');
+    const bodyProducts = productsData.filter(p => p.productType === 'body');
+    const hairProducts = productsData.filter(p => p.productType === 'hair');
+    const unknownProducts = productsData.filter(p => p.productType === 'unknown');
 
-USER SKIN PROFILE:
+    // Determine routine type
+    const routineType = faceProducts.length > 0 && bodyProducts.length === 0 && hairProducts.length === 0 ? 'face' :
+                        bodyProducts.length > 0 && faceProducts.length === 0 && hairProducts.length === 0 ? 'body' :
+                        hairProducts.length > 0 && faceProducts.length === 0 && bodyProducts.length === 0 ? 'hair' :
+                        'mixed';
+
+    // Build context-aware AI prompt based on product types
+    let aiPrompt = '';
+    
+    if (routineType === 'face' || (routineType === 'mixed' && faceProducts.length > 0)) {
+      const skinConcerns = userProfile?.skin_concerns || [];
+      aiPrompt += `You are a skincare routine optimization expert. Analyze this ${routineType === 'mixed' ? 'FACIAL' : ''} routine and provide detailed insights:
+
+USER FACIAL SKIN PROFILE:
 - Skin Type: ${userProfile?.skin_type || 'unknown'}
-- Skin Concerns: ${Array.isArray(skinConcerns) ? skinConcerns.join(', ') : 'none specified'}
+- Facial Concerns: ${Array.isArray(skinConcerns) ? skinConcerns.join(', ') : 'none specified'}
 
-PRODUCTS IN ROUTINE:
-${productsData.map((p, i) => `
+${routineType === 'mixed' ? 'FACIAL ' : ''}PRODUCTS IN ROUTINE:
+${faceProducts.map((p, i) => `
 ${i + 1}. ${p.name}${p.brand ? ` by ${p.brand}` : ''}
    Category: ${p.category || 'unknown'}
    Price: $${p.price || 'unknown'}
@@ -89,23 +136,73 @@ ${i + 1}. ${p.name}${p.brand ? ` by ${p.brand}` : ''}
    Full Ingredients: ${p.ingredients}
 `).join('\n')}
 
+`;
+    }
+
+    if (routineType === 'body' || (routineType === 'mixed' && bodyProducts.length > 0)) {
+      const bodyConcerns = userProfile?.body_concerns || [];
+      aiPrompt += `${routineType === 'mixed' ? '\n\n---\n\n' : ''}You are a body care product optimization expert. Analyze this ${routineType === 'mixed' ? 'BODY CARE' : ''} routine:
+
+USER BODY PROFILE:
+- Body Concerns: ${Array.isArray(bodyConcerns) ? bodyConcerns.join(', ') : 'none specified'}
+
+${routineType === 'mixed' ? 'BODY CARE ' : ''}PRODUCTS IN ROUTINE:
+${bodyProducts.map((p, i) => `
+${i + 1}. ${p.name}${p.brand ? ` by ${p.brand}` : ''}
+   Category: ${p.category || 'unknown'}
+   Price: $${p.price || 'unknown'}
+   Used: ${p.frequency}
+   EpiQ Score: ${p.epiqScore}/100
+   Full Ingredients: ${p.ingredients}
+`).join('\n')}
+
+Focus on body-specific concerns: fragrance content, skin irritation potential, moisturizing ingredients, deodorant effectiveness.
+
+`;
+    }
+
+    if (routineType === 'hair' || (routineType === 'mixed' && hairProducts.length > 0)) {
+      aiPrompt += `${routineType === 'mixed' ? '\n\n---\n\n' : ''}You are a hair care product optimization expert. Analyze this ${routineType === 'mixed' ? 'HAIR/SCALP CARE' : ''} routine:
+
+USER SCALP/HAIR PROFILE:
+- Scalp Type: ${userProfile?.scalp_type || 'unknown'}
+
+${routineType === 'mixed' ? 'HAIR CARE ' : ''}PRODUCTS IN ROUTINE:
+${hairProducts.map((p, i) => `
+${i + 1}. ${p.name}${p.brand ? ` by ${p.brand}` : ''}
+   Category: ${p.category || 'unknown'}
+   Price: $${p.price || 'unknown'}
+   Used: ${p.frequency}
+   EpiQ Score: ${p.epiqScore}/100
+   Full Ingredients: ${p.ingredients}
+`).join('\n')}
+
+Focus on hair-specific concerns: sulfates, silicones, scalp health ingredients, protein/moisture balance.
+
+`;
+    }
+
+    aiPrompt += `
 Provide a comprehensive analysis covering:
 
-1. INGREDIENT REDUNDANCIES: Identify duplicate active ingredients across products with specific percentages/concentrations
+1. INGREDIENT REDUNDANCIES: Identify duplicate active ingredients across products
 2. CONFLICTING ACTIVES: Flag combinations that may cause irritation or reduce effectiveness
-3. FORMULATION ISSUES: Point out problematic ingredients like high fragrance content, lack of stabilizers
-4. COST OPTIMIZATION: Suggest alternatives that are:
-   - Better suited for ${userProfile?.skin_type || 'their'} skin type
-   - Address their specific concerns: ${Array.isArray(skinConcerns) ? skinConcerns.join(', ') : 'general skin health'}
-   - More cost-effective with NUMERIC savings
-   - Contain similar or better active ingredients
-5. ROUTINE EFFICIENCY: Recommend which products could be eliminated without losing benefits
+3. FORMULATION ISSUES: Point out problematic ingredients
+4. COST OPTIMIZATION: Suggest alternatives with NUMERIC savings
+5. ROUTINE EFFICIENCY: Recommend which products could be eliminated
 
-Format your response as a structured JSON with these sections:
+${unknownProducts.length > 0 ? `
+6. OUT OF SCOPE PRODUCTS: The following products have unclear categories:
+${unknownProducts.map(p => `- ${p.name}`).join('\n')}
+Please note these in the "outOfScope" section.
+` : ''}
+
+Format your response as a structured JSON:
 {
-  "redundancies": [{ "ingredient": "", "products": [], "recommendation": "" }],
-  "conflicts": [{ "actives": [], "risk": "", "suggestion": "" }],
-  "formulationIssues": [{ "product": "", "issue": "", "impact": "" }],
+  "routineType": "${routineType}",
+  "redundancies": [{ "ingredient": "", "products": [], "recommendation": "", "category": "face|body|hair" }],
+  "conflicts": [{ "actives": [], "risk": "", "suggestion": "", "category": "face|body|hair" }],
+  "formulationIssues": [{ "product": "", "issue": "", "impact": "", "category": "face|body|hair" }],
   "costOptimizations": [{ 
     "product": "", 
     "currentPrice": 45.00,
@@ -113,14 +210,14 @@ Format your response as a structured JSON with these sections:
     "suggestedAlternative": "", 
     "alternativePrice": 25.00,
     "potentialSavings": 20.00,
-    "skinBenefits": "Explain why this alternative is better for their specific skin type and concerns"
+    "skinBenefits": "",
+    "category": "face|body|hair"
   }],
-  "routineEfficiency": { "canEliminate": [], "reasoning": "" },
+  "routineEfficiency": { "canEliminate": [], "reasoning": "", "category": "face|body|hair" },
+  ${unknownProducts.length > 0 ? `"outOfScope": [{ "product": "", "reason": "", "suggestion": "" }],` : ''}
   "overallScore": 85,
   "summary": ""
-}
-
-IMPORTANT: For costOptimizations, use actual numeric values for currentPrice, alternativePrice, and potentialSavings based on the product prices provided.`;
+}`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -147,9 +244,16 @@ IMPORTANT: For costOptimizations, use actual numeric values for currentPrice, al
     const aiData = await aiResponse.json();
     const optimizationData = JSON.parse(aiData.choices[0].message.content);
 
-    // Calculate total cost
+    // Calculate total cost and add metadata
     const totalCost = productsData.reduce((sum, p) => sum + (p.price || 0), 0);
     optimizationData.totalRoutineCost = totalCost;
+    optimizationData.routineType = routineType;
+    optimizationData.productCounts = {
+      face: faceProducts.length,
+      body: bodyProducts.length,
+      hair: hairProducts.length,
+      unknown: unknownProducts.length
+    };
 
     // Calculate total potential savings
     const totalPotentialSavings = optimizationData.costOptimizations?.reduce(
