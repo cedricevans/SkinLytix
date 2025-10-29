@@ -48,7 +48,10 @@ export default function Routine() {
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
   const [productPrice, setProductPrice] = useState("");
   const [usageFrequency, setUsageFrequency] = useState("Both");
+  const [productCategory, setProductCategory] = useState("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  
+  const [showProductsDialog, setShowProductsDialog] = useState(false);
   
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
@@ -133,6 +136,7 @@ export default function Routine() {
     setSelectedAnalysisId(analysisId);
     setProductPrice("");
     setUsageFrequency("Both");
+    setProductCategory("");
     setEditingProductId(null);
     setShowPriceDialog(true);
   };
@@ -142,6 +146,7 @@ export default function Routine() {
     setSelectedAnalysisId(routineProduct.analysis_id);
     setProductPrice(routineProduct.product_price?.toString() || "");
     setUsageFrequency(routineProduct.usage_frequency);
+    setProductCategory((routineProduct as any).category || "");
     setShowPriceDialog(true);
   };
 
@@ -184,6 +189,7 @@ export default function Routine() {
           .update({
             usage_frequency: usageFrequency,
             product_price: price,
+            category: productCategory || null,
           })
           .eq("id", editingProductId);
 
@@ -198,6 +204,7 @@ export default function Routine() {
             analysis_id: selectedAnalysisId,
             usage_frequency: usageFrequency,
             product_price: price,
+            category: productCategory || null,
           });
 
         if (error) throw error;
@@ -513,10 +520,15 @@ export default function Routine() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Add Products</h2>
-            <Button onClick={() => setShowManualEntryDialog(true)} variant="default">
-              <Plus className="w-4 h-4 mr-2" />
-              Add New Product
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setShowProductsDialog(true)} variant="outline">
+                View All Products ({availableAnalyses.length})
+              </Button>
+              <Button onClick={() => setShowManualEntryDialog(true)} variant="default">
+                <Plus className="w-4 h-4 mr-2" />
+                Add New Product
+              </Button>
+            </div>
           </div>
           <div className="grid gap-4">
             {availableAnalyses
@@ -572,6 +584,31 @@ export default function Routine() {
                   value={productPrice}
                   onChange={(e) => setProductPrice(e.target.value)}
                 />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Label htmlFor="category">Category</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>Specify the product category to help organize your routine (Face, Body, Hair).</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <select
+                  id="category"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={productCategory}
+                  onChange={(e) => setProductCategory(e.target.value)}
+                >
+                  <option value="">Not specified</option>
+                  <option value="face">Face</option>
+                  <option value="body">Body</option>
+                  <option value="hair">Hair</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -718,6 +755,64 @@ export default function Routine() {
                 <Sparkles className="w-4 h-4 mr-2" />
                 Optimize Now
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* All Products Dialog */}
+        <Dialog open={showProductsDialog} onOpenChange={setShowProductsDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>All Analyzed Products ({availableAnalyses.length})</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 overflow-y-auto max-h-[60vh]">
+              {availableAnalyses.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  No analyzed products yet. Scan products to get started.
+                </p>
+              ) : (
+                <div className="grid gap-3">
+                  {availableAnalyses.map((analysis) => {
+                    const isInRoutine = routineProducts.some((rp) => rp.analysis_id === analysis.id);
+                    return (
+                      <Card key={analysis.id} className="p-4">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1">
+                            <h3 className="font-semibold mb-1">{analysis.product_name}</h3>
+                            <div className="flex items-center gap-2">
+                              {analysis.epiq_score !== null && (
+                                <span className="text-sm text-muted-foreground">
+                                  EpiQ Score: {analysis.epiq_score}
+                                </span>
+                              )}
+                              <span className="text-xs text-muted-foreground">
+                                • {new Date(analysis.analyzed_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          {isInRoutine ? (
+                            <Badge variant="secondary">In Routine</Badge>
+                          ) : (
+                            <Button
+                              onClick={() => {
+                                setShowProductsDialog(false);
+                                openPriceDialog(analysis.id);
+                              }}
+                              size="sm"
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add to Routine
+                            </Button>
+                          )}
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setShowProductsDialog(false)}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

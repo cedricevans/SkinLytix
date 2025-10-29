@@ -108,9 +108,9 @@ export default function RoutineOptimization() {
   const getCategoryBadge = (category?: string) => {
     if (!category) return null;
     const colors = {
-      face: 'bg-primary/10 text-primary',
-      body: 'bg-secondary/10 text-secondary',
-      hair: 'bg-accent/10 text-accent'
+      face: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      body: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+      hair: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
     };
     return (
       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colors[category as keyof typeof colors] || 'bg-muted text-muted-foreground'}`}>
@@ -181,6 +181,28 @@ export default function RoutineOptimization() {
             </p>
           </div>
         </Card>
+
+        {/* Total Potential Savings Card */}
+        {data.totalPotentialSavings !== undefined && data.totalPotentialSavings > 0 && (
+          <Card className="p-6 mb-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/10 border-green-200 dark:border-green-800">
+            <div className="text-center">
+              <h2 className="text-lg font-semibold text-green-800 dark:text-green-300 mb-2">
+                💰 Total Potential Savings
+              </h2>
+              <div className="text-5xl font-bold text-green-600 dark:text-green-400 mb-2">
+                ${data.totalPotentialSavings.toFixed(2)}
+              </div>
+              <p className="text-sm text-green-700 dark:text-green-400">
+                By switching to recommended alternatives
+              </p>
+              {data.totalRoutineCost > 0 && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Save {((data.totalPotentialSavings / data.totalRoutineCost) * 100).toFixed(0)}% on your routine cost
+                </p>
+              )}
+            </div>
+          </Card>
+        )}
 
         {/* Out of Scope Products */}
         {data.outOfScope && data.outOfScope.length > 0 && (

@@ -196,6 +196,7 @@ export type Database = {
       routine_products: {
         Row: {
           analysis_id: string
+          category: string | null
           created_at: string
           id: string
           product_price: number | null
@@ -204,6 +205,7 @@ export type Database = {
         }
         Insert: {
           analysis_id: string
+          category?: string | null
           created_at?: string
           id?: string
           product_price?: number | null
@@ -212,6 +214,7 @@ export type Database = {
         }
         Update: {
           analysis_id?: string
+          category?: string | null
           created_at?: string
           id?: string
           product_price?: number | null
