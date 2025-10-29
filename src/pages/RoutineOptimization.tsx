@@ -368,21 +368,27 @@ export default function RoutineOptimization() {
                   <div className="flex items-center gap-4 my-2">
                     <div>
                       <p className="text-xs text-muted-foreground">Current</p>
-                      <p className="text-lg font-semibold">${item.currentPrice.toFixed(2)}</p>
+                      <p className="text-lg font-semibold">
+                        {item.currentPrice != null ? `$${item.currentPrice.toFixed(2)}` : 'N/A'}
+                      </p>
                     </div>
                     <div className="text-muted-foreground">→</div>
                     <div>
                       <p className="text-xs text-muted-foreground">Alternative</p>
-                      <p className="text-lg font-semibold">${item.alternativePrice.toFixed(2)}</p>
+                      <p className="text-lg font-semibold">
+                        {item.alternativePrice != null ? `$${item.alternativePrice.toFixed(2)}` : 'N/A'}
+                      </p>
                     </div>
                     <div className="ml-auto text-right">
                       <p className="text-xs text-muted-foreground">You Save</p>
                       <p className="text-lg font-bold text-green-600">
-                        ${item.potentialSavings.toFixed(2)}
+                        {item.potentialSavings != null ? `$${item.potentialSavings.toFixed(2)}` : 'N/A'}
                       </p>
-                      <p className="text-xs text-green-600">
-                        ({((item.potentialSavings / item.currentPrice) * 100).toFixed(0)}% off)
-                      </p>
+                      {item.potentialSavings != null && item.currentPrice != null && item.currentPrice > 0 && (
+                        <p className="text-xs text-green-600">
+                          ({((item.potentialSavings / item.currentPrice) * 100).toFixed(0)}% off)
+                        </p>
+                      )}
                     </div>
                   </div>
                   <p className="text-sm">
