@@ -29,6 +29,8 @@ interface AnalysisData {
     product_metadata?: {
       brand?: string;
       category?: string;
+      product_type?: string;
+      product_type_label?: string;
     };
     ingredient_data?: Array<{
       name: string;
@@ -301,20 +303,19 @@ const Analysis = () => {
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">{analysis.product_name}</h1>
           <div className="flex flex-wrap gap-2 mb-2">
-            <Badge variant="secondary" className="text-base">
-              {productType === 'face' && '👤 Face'}
-              {productType === 'body' && '🧴 Body'}
-              {productType === 'hair' && '💆 Hair'}
-              {productType === 'other' && '🔍 Personal Care'}
-            </Badge>
-            {(analysis.brand || analysis.recommendations_json?.product_metadata?.brand) && (
-              <Badge variant="secondary">
-                {analysis.brand || analysis.recommendations_json?.product_metadata?.brand}
+            {productMetadata?.product_type_label && (
+              <Badge variant="default" className="text-base">
+                {productMetadata.product_type_label}
               </Badge>
             )}
-            {(analysis.category || analysis.recommendations_json?.product_metadata?.category) && (
+            {(analysis.brand || productMetadata?.brand) && (
+              <Badge variant="secondary">
+                {analysis.brand || productMetadata.brand}
+              </Badge>
+            )}
+            {(analysis.category || productMetadata?.category) && (
               <Badge variant="outline">
-                {analysis.category || analysis.recommendations_json?.product_metadata?.category}
+                {analysis.category || productMetadata.category}
               </Badge>
             )}
           </div>

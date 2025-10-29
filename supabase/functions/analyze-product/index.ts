@@ -489,8 +489,16 @@ serve(async (req) => {
       return suggestions;
     };
 
-    const getConcernGuidance = (concerns: string[], actives: Array<{name: string, info: any}>, prodType: string): string[] => {
+    const getConcernGuidance = (concerns: string[], actives: Array<{name: string, info: any}>, prodType: string, profile: any): string[] => {
       const suggestions = [];
+      
+      // Add context intro based on product type
+      if (prodType === 'body' && concerns.some(c => c.includes('body-') || c.includes('eczema') || c.includes('keratosis'))) {
+        suggestions.push('💪 Body-specific optimization tips:');
+      } else if (prodType === 'hair' && profile?.scalp_type) {
+        suggestions.push(`🧴 Optimized for ${profile.scalp_type} scalp:`);
+      }
+      
       const concernMap: Record<string, string> = {
         // Face
         'acne': 'Apply to problem areas after cleansing. Avoid over-layering multiple acne treatments.',
@@ -581,36 +589,85 @@ serve(async (req) => {
       return suggestions;
     };
 
-    const getSkinTypeTips = (skinType: string, actives: Array<{name: string, info: any}>, prodType: string): string[] => {
+    const getProductTypeTips = (profile: any, actives: Array<{name: string, info: any}>, prodType: string): string[] => {
       const suggestions = [];
-      const tips: Record<string, string> = {
-        'sensitive': '🧴 Patch test on inner arm for 24-48 hours before facial use',
-        'oily': '🎯 Apply to clean, dry skin. No need for heavy moisturizer on top',
-        'dry': '💧 Layer over hydrating toner. Seal with rich moisturizer to prevent water loss',
-        'combination': '⚖️ Apply to entire face, but reduce frequency in oily zones if needed',
-        'normal': '✓ Use consistently morning and/or evening based on product type'
-      };
-
-      if (tips[skinType]) {
-        suggestions.push(tips[skinType]);
-      }
-
-      if (skinType === 'sensitive' && actives.length > 0) {
-        suggestions.push('⏱️ Start 2x/week, gradually increase as tolerated');
+      
+      if (prodType === 'face') {
+        const skinType = profile?.skin_type || 'normal';
+        const faceTips: Record<string, string> = {
+          'sensitive': '🧴 Patch test on inner arm for 24-48 hours before facial use',
+          'oily': '🎯 Apply to clean, dry skin. No need for heavy moisturizer on top',
+          'dry': '💧 Layer over hydrating toner. Seal with rich moisturizer to prevent water loss',
+          'combination': '⚖️ Apply to entire face, but reduce frequency in oily zones if needed',
+          'normal': '✓ Use consistently morning and/or evening based on product type'
+        };
+        
+        if (faceTips[skinType]) {
+          suggestions.push(faceTips[skinType]);
+        }
+        
+        if (skinType === 'sensitive' && actives.length > 0) {
+          suggestions.push('⏱️ Start 2x/week, gradually increase as tolerated');
+        }
+      } 
+      else if (prodType === 'body') {
+        const bodyConcerns = profile?.body_concerns || [];
+        
+        if (bodyConcerns.includes('eczema') || bodyConcerns.includes('sensitive-skin')) {
+          suggestions.push('🧴 Patch test on inner arm. Apply to damp skin within 3 min of showering');
+        } else {
+          suggestions.push('💧 Apply to damp skin after showering for maximum absorption');
+        }
+        
+        if (bodyConcerns.includes('keratosis-pilaris')) {
+          suggestions.push('🎯 Focus on rough areas (upper arms, thighs). Consistent use shows results in 4-6 weeks');
+        }
+        
+        if (bodyConcerns.includes('body-acne')) {
+          suggestions.push('🚿 Use after cleansing. Focus on back, chest, and shoulders');
+        }
+      } 
+      else if (prodType === 'hair') {
+        const scalpType = profile?.scalp_type;
+        
+        if (scalpType === 'oily') {
+          suggestions.push('🚿 Focus on scalp, not hair lengths. Avoid heavy products on roots');
+        } else if (scalpType === 'dry') {
+          suggestions.push('💧 Apply to scalp and leave on as directed. Avoid over-washing');
+        } else if (scalpType === 'sensitive') {
+          suggestions.push('🧴 Patch test behind ear. Use lukewarm water (hot water increases sensitivity)');
+        } else {
+          suggestions.push('✓ Massage into scalp for 30-60 seconds for best absorption');
+        }
       }
 
       return suggestions;
     };
 
-    const generateSummary = (score: number, skinType: string, prodType: string): string => {
-      const typeLabel = prodType === 'face' ? 'skin' : prodType === 'hair' ? 'hair' : 'body';
+    const generateSummary = (score: number, profile: any, prodType: string): string => {
+      // Determine the context based on product type
+      let context = '';
+      if (prodType === 'face') {
+        context = profile?.skin_type ? `your ${profile.skin_type} skin` : 'your facial skin';
+      } else if (prodType === 'body') {
+        const bodyConcerns = profile?.body_concerns || [];
+        context = bodyConcerns.length > 0 
+          ? `your body (addressing ${bodyConcerns.slice(0, 2).join(', ')})` 
+          : 'your body';
+      } else if (prodType === 'hair') {
+        context = profile?.scalp_type 
+          ? `your ${profile.scalp_type} scalp/hair` 
+          : 'your hair';
+      } else {
+        context = 'your needs';
+      }
       
       if (score >= 70) {
-        return `Great match for your ${skinType || ''} ${typeLabel}! This product has a strong ingredient profile.`;
+        return `Great match for ${context}! This product has a strong ingredient profile.`;
       } else if (score >= 50) {
-        return `Decent option. Some ingredients may need attention for your ${skinType || ''} ${typeLabel}.`;
+        return `Decent option for ${context}. Some ingredients may need attention.`;
       } else {
-        return `Not ideal for your ${typeLabel} profile. Consider alternatives with safer formulations.`;
+        return `Not ideal for ${context}. Consider alternatives with safer formulations.`;
       }
     };
 
@@ -621,10 +678,10 @@ serve(async (req) => {
     
     const routineSuggestions = [
       ...getTimingRecommendations(detectedActives, productType),
-      ...getConcernGuidance(allConcerns, detectedActives, productType),
+      ...getConcernGuidance(allConcerns, detectedActives, productType, profile),
       ...getApplicationTechnique(productCategory, productType),
       ...getInteractionWarnings(detectedActives),
-      ...getSkinTypeTips(profile?.skin_type || 'normal', detectedActives, productType),
+      ...getProductTypeTips(profile, detectedActives, productType),
     ].slice(0, 5);
 
     for (const active of detectedActives.slice(0, 2)) {
@@ -637,13 +694,17 @@ serve(async (req) => {
       safe_ingredients: safe,
       concern_ingredients: concerns,
       warnings: warnings,
-      summary: generateSummary(epiqScore, profile?.skin_type || '', productType),
+      summary: generateSummary(epiqScore, profile, productType),
       routine_suggestions: routineSuggestions,
       personalized: !!profile,
       product_metadata: {
         brand: extractedBrand,
         category: extractedCategory,
-        product_type: productType
+        product_type: productType,
+        product_type_label: productType === 'face' ? '👤 Facial Care' : 
+                            productType === 'body' ? '💪 Body Care' : 
+                            productType === 'hair' ? '💇 Hair/Scalp Care' : 
+                            '🧴 Other'
       }
     };
 
