@@ -58,33 +58,64 @@ serve(async (req) => {
       if (tagString.includes('body oil')) return 'body-oil';
       if (tagString.includes('body scrub')) return 'body-scrub';
       if (tagString.includes('body sunscreen')) return 'body-sunscreen';
+      if (tagString.includes('body spray') || tagString.includes('body mist')) return 'body-spray';
+      if (tagString.includes('cologne') || tagString.includes('eau de toilette')) return 'fragrance';
       
       // HAIR
       if (tagString.includes('shampoo')) return 'shampoo';
       if (tagString.includes('conditioner')) return 'conditioner';
       if (tagString.includes('hair mask')) return 'hair-mask';
-      if (tagString.includes('scalp treatment')) return 'scalp-treatment';
+      if (tagString.includes('scalp treatment') || tagString.includes('anti-dandruff')) return 'scalp-treatment';
       if (tagString.includes('hair oil')) return 'hair-oil';
+      if (tagString.includes('hair gel') || tagString.includes('styling gel')) return 'hair-gel';
+      if (tagString.includes('pomade') || tagString.includes('hair wax')) return 'pomade';
+      if (tagString.includes('hair spray') || tagString.includes('hairspray')) return 'hair-spray';
+      if (tagString.includes('mousse') || tagString.includes('styling foam')) return 'mousse';
+      if (tagString.includes('leave-in')) return 'leave-in-treatment';
+      if (tagString.includes('scalp serum')) return 'scalp-serum';
+      if (tagString.includes('hair growth') || tagString.includes('hair thickening')) return 'hair-growth';
+      
+      // BEARD CARE
+      if (tagString.includes('beard wash') || tagString.includes('beard cleanser')) return 'beard-wash';
+      if (tagString.includes('beard oil')) return 'beard-oil';
+      if (tagString.includes('beard balm')) return 'beard-balm';
+      if (tagString.includes('beard conditioner') || tagString.includes('beard softener')) return 'beard-conditioner';
+      if (tagString.includes('beard wax') || tagString.includes('mustache wax')) return 'beard-wax';
       
       // SHAVING
-      if (tagString.includes('shaving') || tagString.includes('aftershave')) return 'shaving';
+      if (tagString.includes('shaving cream') || tagString.includes('shaving foam')) return 'shaving-cream';
+      if (tagString.includes('pre-shave')) return 'pre-shave';
+      if (tagString.includes('aftershave')) return 'aftershave';
+      if (tagString.includes('razor bump') || tagString.includes('ingrown hair treatment')) return 'razor-treatment';
+      if (tagString.includes('shaving')) return 'shaving';
       
       return null;
     };
 
     // Helper: Get product type from category
     const getProductType = (category: string): 'face' | 'body' | 'hair' | 'other' => {
-      const lowerCategory = category.toLowerCase().trim(); // NORMALIZE HERE
+      const lowerCategory = category.toLowerCase().trim();
       
+      // FACE
       if (['face-cleanser', 'serum', 'face-moisturizer', 'sunscreen', 'toner', 'mask', 'eye-cream'].includes(lowerCategory)) {
         return 'face';
       }
-      if (['body-wash', 'body-lotion', 'hand-cream', 'foot-cream', 'deodorant', 'body-oil', 'body-scrub', 'body-sunscreen', 'shaving'].includes(lowerCategory)) {
+      
+      // BODY (including shaving products and fragrances)
+      if (['body-wash', 'body-lotion', 'hand-cream', 'foot-cream', 'deodorant', 'body-oil', 
+           'body-scrub', 'body-sunscreen', 'body-spray', 'fragrance',
+           'shaving', 'shaving-cream', 'pre-shave', 'aftershave', 'razor-treatment'].includes(lowerCategory)) {
         return 'body';
       }
-      if (['shampoo', 'conditioner', 'hair-mask', 'scalp-treatment', 'hair-oil'].includes(lowerCategory)) {
+      
+      // HAIR (including beard care, styling products, scalp care)
+      if (['shampoo', 'conditioner', 'hair-mask', 'scalp-treatment', 'hair-oil',
+           'beard-wash', 'beard-oil', 'beard-balm', 'beard-conditioner', 'beard-wax',
+           'hair-gel', 'pomade', 'hair-spray', 'mousse', 'leave-in-treatment',
+           'scalp-serum', 'hair-growth'].includes(lowerCategory)) {
         return 'hair';
       }
+      
       return 'other';
     };
 
@@ -138,7 +169,8 @@ serve(async (req) => {
     }
 
     const productType = getProductType(extractedCategory || 'unknown');
-    console.log(`Product categorization: "${extractedCategory}" (${extractedBrand}) → productType: "${productType}"`);
+    const detectionSource = category ? 'user-provided' : cachedProductData ? 'OBF-cache' : 'auto-detected';
+    console.log(`Product categorization: "${extractedCategory}" (${extractedBrand}) → productType: "${productType}" | Source: ${detectionSource}`);
 
     // Parse ingredients list
     const ingredientsArray = ingredients_list
@@ -683,9 +715,10 @@ serve(async (req) => {
           ? `your body (addressing ${bodyConcerns.slice(0, 2).join(', ')})` 
           : 'your body';
       } else if (prodType === 'hair') {
+        const isBeardProduct = extractedCategory?.toLowerCase().includes('beard');
         context = profile?.scalp_type 
-          ? `your ${profile.scalp_type} scalp/hair` 
-          : 'your hair';
+          ? `your ${profile.scalp_type} ${isBeardProduct ? 'beard/skin' : 'scalp/hair'}` 
+          : `your ${isBeardProduct ? 'beard' : 'hair'}`;
       } else {
         context = 'your needs';
       }
@@ -721,23 +754,57 @@ serve(async (req) => {
           suggestions.push('📅 Use 2-3 times per week, not daily, to avoid over-exfoliation');
           suggestions.push('💦 Apply to damp skin in circular motions. Rinse thoroughly');
           suggestions.push('🧴 Follow immediately with moisturizer or body oil');
+        } else if (lowerCategory.includes('shaving') || lowerCategory.includes('razor')) {
+          if (lowerCategory.includes('pre-shave')) {
+            suggestions.push('🚿 Apply to clean, damp skin before shaving cream');
+            suggestions.push('💧 Softens hair and creates protective barrier');
+            suggestions.push('⏱️ Let sit for 30 seconds before applying shaving cream');
+          } else if (lowerCategory.includes('aftershave') || lowerCategory.includes('razor bump')) {
+            suggestions.push('✨ Apply to clean skin immediately after shaving');
+            suggestions.push('🧊 Splash with cold water first to close pores');
+            suggestions.push('⚠️ Avoid products with alcohol if you have sensitive skin');
+          } else {
+            suggestions.push('🔥 Let shaving cream sit for 30-60 seconds before shaving');
+            suggestions.push('🪒 Shave with the grain first, against grain only for closer shave');
+            suggestions.push('💧 Use warm water to soften hair before applying');
+          }
         } else {
           suggestions.push('💧 Apply to clean, damp skin for best absorption');
           suggestions.push('🧴 Use consistently for 4-6 weeks to see full benefits');
         }
       } else if (prodType === 'hair') {
-        if (lowerCategory.includes('shampoo')) {
-          suggestions.push('🚿 Focus on scalp, not lengths. Use fingertips (not nails) to massage');
-          suggestions.push('💧 Double cleanse if you use heavy styling products');
-          suggestions.push('⏱️ Adjust frequency based on scalp type: oily (daily), normal (2-3x/week), dry (1-2x/week)');
-        } else if (lowerCategory.includes('conditioner')) {
+        if (lowerCategory.includes('shampoo') || lowerCategory.includes('beard wash')) {
+          suggestions.push('🚿 Focus on scalp/skin, not lengths. Use fingertips (not nails) to massage');
+          suggestions.push('💧 Double cleanse if you use heavy styling products or beard balms');
+          suggestions.push('⏱️ Adjust frequency: oily (daily), normal (2-3x/week), dry (1-2x/week)');
+        } else if (lowerCategory.includes('conditioner') || lowerCategory.includes('beard conditioner')) {
           suggestions.push('📏 Apply from mid-length to ends, avoiding scalp unless very dry');
-          suggestions.push('⏱️ Leave on for 2-3 minutes minimum for best results');
+          suggestions.push('⏱️ Leave on for 2-3 minutes minimum for best softening results');
           suggestions.push('🧊 Finish with cool water rinse to seal cuticles and add shine');
-        } else if (lowerCategory.includes('oil') || lowerCategory.includes('serum')) {
+        } else if (lowerCategory.includes('beard oil')) {
+          suggestions.push('💧 Apply to damp beard for easier distribution');
+          suggestions.push('🌙 Can be used as overnight treatment. Wash out in morning if needed');
+          suggestions.push('⚠️ Start with 2-3 drops for short beards, 4-6 for longer. Less is more');
+        } else if (lowerCategory.includes('hair oil') || lowerCategory.includes('serum')) {
           suggestions.push('💧 Use on damp hair for easier distribution and better absorption');
           suggestions.push('🌙 Can be used as overnight treatment. Shampoo out in morning');
           suggestions.push('⚠️ Start with 1-2 drops. Fine hair needs less than thick/coarse hair');
+        } else if (lowerCategory.includes('beard balm') || lowerCategory.includes('beard wax')) {
+          suggestions.push('🔥 Warm between palms until melted before applying');
+          suggestions.push('💨 Apply to towel-dried beard. Style while damp for best hold');
+          suggestions.push('📏 Use pea-sized amount for short beards, dime-sized for medium-long');
+        } else if (lowerCategory.includes('pomade') || lowerCategory.includes('gel') || lowerCategory.includes('wax')) {
+          suggestions.push('💧 Apply to damp (not wet) hair for natural finish, dry hair for maximum hold');
+          suggestions.push('🖐️ Start with small amount (dime-sized). You can always add more');
+          suggestions.push('🧴 Work from roots to tips for even distribution');
+        } else if (lowerCategory.includes('scalp serum') || lowerCategory.includes('hair growth')) {
+          suggestions.push('🎯 Apply directly to scalp, not hair. Part hair in sections for best coverage');
+          suggestions.push('💆 Massage for 1-2 minutes to boost circulation');
+          suggestions.push('⏰ Use consistently for 3-6 months before expecting visible results');
+        } else if (lowerCategory.includes('leave-in')) {
+          suggestions.push('🚿 Apply to towel-dried hair (not soaking wet)');
+          suggestions.push('💨 Focus on mid-lengths to ends. Avoid roots if hair is fine/oily');
+          suggestions.push('✨ Can be layered under styling products for added protection');
         } else {
           suggestions.push('🚿 Use as directed on product label');
           suggestions.push('💇 Adjust frequency based on your hair\'s response');
