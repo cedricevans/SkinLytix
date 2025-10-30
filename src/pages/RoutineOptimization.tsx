@@ -165,12 +165,12 @@ export default function RoutineOptimization() {
                   </span>
                 )}
                 {data.productCounts.body > 0 && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-secondary/10 text-secondary">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                     {data.productCounts.body} Body
                   </span>
                 )}
                 {data.productCounts.hair > 0 && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-accent/10 text-accent">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
                     {data.productCounts.hair} Hair
                   </span>
                 )}
