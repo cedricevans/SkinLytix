@@ -187,36 +187,14 @@ export default function Routine() {
     const price = productPrice.trim() === "" ? null : parseFloat(productPrice);
 
     try {
-      // Update price in user_analyses (permanent storage)
-    if (price !== null && !isNaN(price)) {
-      // Allow 0 as valid price (free samples, gifts, etc.)
-      const { error: priceError } = await supabase
-        .from("user_analyses")
-        .update({ product_price: price })
-        .eq("id", selectedAnalysisId);
-      
-      if (priceError) {
-        console.error("Error updating price:", priceError);
-      }
-    } else if (productPrice === "") {
-      // If user clears the price field, set to null
-      const { error: priceError } = await supabase
-        .from("user_analyses")
-        .update({ product_price: null })
-        .eq("id", selectedAnalysisId);
-      
-      if (priceError) {
-        console.error("Error clearing price:", priceError);
-      }
-    }
-
       if (editingProductId) {
-        // Update existing product (frequency & category only)
+        // Update existing product
         const { error } = await supabase
           .from("routine_products")
           .update({
             usage_frequency: usageFrequency,
             category: productCategory || null,
+            product_price: price,
           })
           .eq("id", editingProductId);
 
@@ -231,6 +209,7 @@ export default function Routine() {
             analysis_id: selectedAnalysisId,
             usage_frequency: usageFrequency,
             category: productCategory || null,
+            product_price: price,
           });
 
         if (error) throw error;
