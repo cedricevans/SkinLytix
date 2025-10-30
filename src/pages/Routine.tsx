@@ -188,16 +188,27 @@ export default function Routine() {
 
     try {
       // Update price in user_analyses (permanent storage)
-      if (price !== null && price > 0) {
-        const { error: priceError } = await supabase
-          .from("user_analyses")
-          .update({ product_price: price })
-          .eq("id", selectedAnalysisId);
-        
-        if (priceError) {
-          console.error("Error updating price:", priceError);
-        }
+    if (price !== null && !isNaN(price)) {
+      // Allow 0 as valid price (free samples, gifts, etc.)
+      const { error: priceError } = await supabase
+        .from("user_analyses")
+        .update({ product_price: price })
+        .eq("id", selectedAnalysisId);
+      
+      if (priceError) {
+        console.error("Error updating price:", priceError);
       }
+    } else if (productPrice === "") {
+      // If user clears the price field, set to null
+      const { error: priceError } = await supabase
+        .from("user_analyses")
+        .update({ product_price: null })
+        .eq("id", selectedAnalysisId);
+      
+      if (priceError) {
+        console.error("Error clearing price:", priceError);
+      }
+    }
 
       if (editingProductId) {
         // Update existing product (frequency & category only)
