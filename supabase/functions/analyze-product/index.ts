@@ -461,6 +461,7 @@ serve(async (req) => {
         concerns: ['aging', 'acne'],
         conflicts: ['vitamin c', 'aha', 'bha'],
         tips: ['Start 2-3x/week and build tolerance', 'Apply to completely dry skin', 'Wait 20 minutes before moisturizer'],
+        product_types: ['face'],
         sunSensitivity: true,
         category: 'active'
       },
@@ -469,6 +470,7 @@ serve(async (req) => {
         concerns: ['aging', 'hyperpigmentation'],
         conflicts: ['retinol'],
         tips: ['Apply to clean skin first', 'Always follow with SPF 30+', 'Store in dark, cool place'],
+        product_types: ['face'],
         sunSensitivity: true,
         category: 'active'
       },
@@ -477,6 +479,7 @@ serve(async (req) => {
         concerns: ['acne', 'oily', 'body-acne', 'oily-scalp'],
         conflicts: ['retinol'],
         tips: ['Use on clean, dry skin', 'Start 2x/week if new to acids', 'Avoid eye area'],
+        product_types: ['face', 'body'],
         sunSensitivity: true,
         category: 'active'
       },
@@ -485,6 +488,7 @@ serve(async (req) => {
         concerns: ['dry', 'aging', 'dry-scalp'],
         conflicts: [],
         tips: ['Apply to damp skin for best absorption', 'Follow with moisturizer to seal', 'Use in humid environments or mist face first'],
+        product_types: [],
         sunSensitivity: false,
         category: 'hydrator'
       },
@@ -493,6 +497,7 @@ serve(async (req) => {
         concerns: ['acne', 'hyperpigmentation', 'oily', 'eczema'],
         conflicts: [],
         tips: ['Great layering ingredient', 'Can be used with most actives', 'Safe for all skin types'],
+        product_types: [],
         sunSensitivity: false,
         category: 'active'
       },
@@ -501,6 +506,7 @@ serve(async (req) => {
         concerns: ['aging', 'hyperpigmentation'],
         conflicts: ['retinol', 'bha'],
         tips: ['Use on alternating nights with retinol', 'Must use SPF next morning', 'Start with low concentration'],
+        product_types: ['face'],
         sunSensitivity: true,
         category: 'active'
       },
@@ -509,6 +515,7 @@ serve(async (req) => {
         concerns: ['acne', 'oily'],
         conflicts: ['retinol', 'aha'],
         tips: ['Can penetrate oil in pores', 'Use 2-3x per week maximum', 'Don\'t combine with other exfoliants'],
+        product_types: ['face'],
         sunSensitivity: true,
         category: 'active'
       },
@@ -517,6 +524,7 @@ serve(async (req) => {
         concerns: ['aging', 'hair-thinning'],
         conflicts: [],
         tips: ['Works well with niacinamide', 'Apply before heavier creams', 'Consistent use shows results in 8-12 weeks'],
+        product_types: ['face'],
         sunSensitivity: false,
         category: 'active'
       },
@@ -525,6 +533,7 @@ serve(async (req) => {
         concerns: ['dry', 'sensitive', 'eczema'],
         conflicts: [],
         tips: ['Essential for barrier repair', 'Best used in moisturizers', 'Safe for sensitive skin'],
+        product_types: [],
         sunSensitivity: false,
         category: 'hydrator'
       },
@@ -533,6 +542,7 @@ serve(async (req) => {
         concerns: ['acne', 'body-acne'],
         conflicts: ['retinol'],
         tips: ['Use in AM, retinol in PM to avoid interaction', 'Can bleach fabrics', 'Start with 2.5% concentration'],
+        product_types: ['face', 'body'],
         sunSensitivity: false,
         category: 'active'
       },
@@ -543,6 +553,7 @@ serve(async (req) => {
         concerns: ['keratosis-pilaris', 'dry-hands-feet', 'eczema'],
         conflicts: [],
         tips: ['Especially effective at 10%+ concentration', 'Apply to rough patches (elbows, knees, feet)', 'Can sting on broken skin'],
+        product_types: ['body'],
         sunSensitivity: false,
         category: 'exfoliant'
       },
@@ -551,6 +562,7 @@ serve(async (req) => {
         concerns: ['keratosis-pilaris', 'body-texture'],
         conflicts: ['retinol'],
         tips: ['Apply after shower on damp skin', 'Start with 5% concentration', 'Must use SPF on treated areas'],
+        product_types: ['face', 'body'],
         sunSensitivity: true,
         category: 'exfoliant'
       },
@@ -559,6 +571,7 @@ serve(async (req) => {
         concerns: ['keratosis-pilaris', 'ingrown-hairs'],
         conflicts: ['retinol'],
         tips: ['Powerful exfoliant - start slowly', 'Great for rough body areas', 'Always follow with moisturizer'],
+        product_types: ['face', 'body'],
         sunSensitivity: true,
         category: 'exfoliant'
       },
@@ -567,6 +580,7 @@ serve(async (req) => {
         concerns: ['body-odor'],
         conflicts: [],
         tips: ['Apply to completely dry skin', 'Most effective antiperspirant ingredient', 'Some prefer aluminum-free alternatives'],
+        product_types: ['body'],
         sunSensitivity: false,
         category: 'active'
       },
@@ -577,6 +591,7 @@ serve(async (req) => {
         concerns: ['dandruff', 'scalp-sensitivity'],
         conflicts: [],
         tips: ['Lather and leave on scalp for 3-5 minutes', 'Use 2-3x/week for active dandruff', 'Safe for daily use once controlled'],
+        product_types: ['hair'],
         sunSensitivity: false,
         category: 'active'
       },
@@ -585,6 +600,7 @@ serve(async (req) => {
         concerns: ['body-acne', 'dandruff', 'oily-scalp'],
         conflicts: [],
         tips: ['May cause sensitivity - patch test first', 'Dilute if using pure oil (1-2 drops in shampoo)'],
+        product_types: ['body', 'hair'],
         sunSensitivity: false,
         category: 'active'
       },
@@ -593,6 +609,7 @@ serve(async (req) => {
         concerns: ['hair-thinning'],
         conflicts: [],
         tips: ['Strengthens hair follicles over time', 'Safe for daily use in shampoos and conditioners'],
+        product_types: ['hair'],
         sunSensitivity: false,
         category: 'active'
       },
@@ -601,6 +618,7 @@ serve(async (req) => {
         concerns: ['hair-thinning'],
         conflicts: [],
         tips: ['Stimulates scalp circulation', 'Leave on for 2-3 minutes', 'Best in shampoos and scalp treatments'],
+        product_types: ['hair'],
         sunSensitivity: false,
         category: 'active'
       },
@@ -609,6 +627,7 @@ serve(async (req) => {
         concerns: ['dry-scalp', 'hair-thinning'],
         conflicts: [],
         tips: ['Deeply moisturizing for hair and scalp', 'Great for damaged or color-treated hair'],
+        product_types: ['hair'],
         sunSensitivity: false,
         category: 'hydrator'
       },
@@ -617,6 +636,7 @@ serve(async (req) => {
         concerns: ['cleansing'],
         conflicts: [],
         tips: ['Consider sulfate-free if you have dry/sensitive scalp', 'Use less frequently if experiencing dryness'],
+        product_types: ['hair'],
         sunSensitivity: false,
         category: 'surfactant'
       },
@@ -840,98 +860,114 @@ serve(async (req) => {
     };
 
     // Fallback guidance for products without strong actives
-    const getGeneralProductGuidance = (category: string, prodType: string, profile: any): string[] => {
+    const getGeneralProductGuidance = (category: string, prodType: string, profile: any, productName: string, detectedActives: Array<{name: string, info: any}>): string[] => {
       const suggestions = [];
       const lowerCategory = category?.toLowerCase() || '';
+      const activesText = detectedActives.length > 0 ? detectedActives.slice(0, 2).map(a => a.name).join(' and ') : '';
       
       if (prodType === 'body') {
         if (lowerCategory.includes('oil')) {
-          suggestions.push('💧 Best applied to damp skin right after showering for maximum absorption');
-          suggestions.push('🌙 Perfect for evening use. Can be mixed with body lotion for lighter texture');
+          suggestions.push(`💧 Use ${productName} on damp skin right after showering for maximum absorption`);
+          suggestions.push(`🌙 ${productName} works best in evening routine—can be mixed with lotion for lighter texture`);
           suggestions.push('⏱️ A little goes a long way. Start with 3-4 pumps and increase as needed');
         } else if (lowerCategory.includes('lotion') || lowerCategory.includes('cream')) {
-          suggestions.push('🚿 Apply within 3 minutes of showering to lock in moisture');
+          suggestions.push(`🚿 Apply ${productName} within 3 minutes of showering to lock in moisture`);
           suggestions.push('💪 Reapply to dry areas (elbows, knees, hands) throughout the day');
           suggestions.push('🌡️ Store in cool, dry place. Body products last 12-18 months after opening');
         } else if (lowerCategory.includes('deodorant')) {
-          suggestions.push('✨ Apply to clean, completely dry skin for best results');
+          suggestions.push(`✨ Apply ${productName} to clean, completely dry skin for best results`);
           suggestions.push('🌙 Consider applying at night—antiperspirants work better on inactive sweat glands');
           suggestions.push('⚠️ Wait 2-3 minutes before dressing to prevent transfer to clothing');
         } else if (lowerCategory.includes('scrub') || lowerCategory.includes('exfoliant')) {
-          suggestions.push('📅 Use 2-3 times per week, not daily, to avoid over-exfoliation');
+          suggestions.push(`📅 Use ${productName} 2-3 times per week, not daily, to avoid over-exfoliation`);
           suggestions.push('💦 Apply to damp skin in circular motions. Rinse thoroughly');
           suggestions.push('🧴 Follow immediately with moisturizer or body oil');
         } else if (lowerCategory.includes('shaving') || lowerCategory.includes('razor')) {
           if (lowerCategory.includes('pre-shave')) {
-            suggestions.push('🚿 Apply to clean, damp skin before shaving cream');
+            suggestions.push(`🚿 Apply ${productName} to clean, damp skin before shaving cream`);
             suggestions.push('💧 Softens hair and creates protective barrier');
             suggestions.push('⏱️ Let sit for 30 seconds before applying shaving cream');
           } else if (lowerCategory.includes('aftershave') || lowerCategory.includes('razor bump')) {
-            suggestions.push('✨ Apply to clean skin immediately after shaving');
+            suggestions.push(`✨ Apply ${productName} to clean skin immediately after shaving`);
             suggestions.push('🧊 Splash with cold water first to close pores');
             suggestions.push('⚠️ Avoid products with alcohol if you have sensitive skin');
           } else {
-            suggestions.push('🔥 Let shaving cream sit for 30-60 seconds before shaving');
+            suggestions.push(`🔥 Let ${productName} sit for 30-60 seconds before shaving`);
             suggestions.push('🪒 Shave with the grain first, against grain only for closer shave');
             suggestions.push('💧 Use warm water to soften hair before applying');
           }
         } else {
-          suggestions.push('💧 Apply to clean, damp skin for best absorption');
+          suggestions.push(`💧 Apply ${productName} to clean, damp skin for best absorption`);
           suggestions.push('🧴 Use consistently for 4-6 weeks to see full benefits');
         }
       } else if (prodType === 'hair') {
         if (lowerCategory.includes('shampoo') || lowerCategory.includes('beard wash')) {
-          suggestions.push('🚿 Focus on scalp/skin, not lengths. Use fingertips (not nails) to massage');
+          suggestions.push(`🚿 Use ${productName} on scalp/skin, not lengths. Massage with fingertips (not nails)`);
           suggestions.push('💧 Double cleanse if you use heavy styling products or beard balms');
           suggestions.push('⏱️ Adjust frequency: oily (daily), normal (2-3x/week), dry (1-2x/week)');
         } else if (lowerCategory.includes('conditioner') || lowerCategory.includes('beard conditioner')) {
-          suggestions.push('📏 Apply from mid-length to ends, avoiding scalp unless very dry');
+          suggestions.push(`📏 Apply ${productName} from mid-length to ends, avoiding scalp unless very dry`);
           suggestions.push('⏱️ Leave on for 2-3 minutes minimum for best softening results');
           suggestions.push('🧊 Finish with cool water rinse to seal cuticles and add shine');
         } else if (lowerCategory.includes('beard oil')) {
-          suggestions.push('💧 Apply to damp beard for easier distribution');
+          suggestions.push(`💧 Apply ${productName} to damp beard for easier distribution`);
           suggestions.push('🌙 Can be used as overnight treatment. Wash out in morning if needed');
           suggestions.push('⚠️ Start with 2-3 drops for short beards, 4-6 for longer. Less is more');
         } else if (lowerCategory.includes('hair oil') || lowerCategory.includes('serum')) {
-          suggestions.push('💧 Use on damp hair for easier distribution and better absorption');
+          suggestions.push(`💧 Use ${productName} on damp hair for easier distribution and better absorption`);
           suggestions.push('🌙 Can be used as overnight treatment. Shampoo out in morning');
           suggestions.push('⚠️ Start with 1-2 drops. Fine hair needs less than thick/coarse hair');
         } else if (lowerCategory.includes('beard balm') || lowerCategory.includes('beard wax')) {
-          suggestions.push('🔥 Warm between palms until melted before applying');
+          suggestions.push(`🔥 Warm ${productName} between palms until melted before applying`);
           suggestions.push('💨 Apply to towel-dried beard. Style while damp for best hold');
           suggestions.push('📏 Use pea-sized amount for short beards, dime-sized for medium-long');
         } else if (lowerCategory.includes('pomade') || lowerCategory.includes('gel') || lowerCategory.includes('wax')) {
-          suggestions.push('💧 Apply to damp (not wet) hair for natural finish, dry hair for maximum hold');
+          suggestions.push(`💧 Apply ${productName} to damp (not wet) hair for natural finish, dry hair for maximum hold`);
           suggestions.push('🖐️ Start with small amount (dime-sized). You can always add more');
           suggestions.push('🧴 Work from roots to tips for even distribution');
         } else if (lowerCategory.includes('scalp serum') || lowerCategory.includes('hair growth')) {
-          suggestions.push('🎯 Apply directly to scalp, not hair. Part hair in sections for best coverage');
+          suggestions.push(`🎯 Apply ${productName} directly to scalp, not hair. Part hair in sections for coverage`);
           suggestions.push('💆 Massage for 1-2 minutes to boost circulation');
           suggestions.push('⏰ Use consistently for 3-6 months before expecting visible results');
         } else if (lowerCategory.includes('leave-in')) {
-          suggestions.push('🚿 Apply to towel-dried hair (not soaking wet)');
+          suggestions.push(`🚿 Apply ${productName} to towel-dried hair (not soaking wet)`);
           suggestions.push('💨 Focus on mid-lengths to ends. Avoid roots if hair is fine/oily');
           suggestions.push('✨ Can be layered under styling products for added protection');
         } else {
-          suggestions.push('🚿 Use as directed on product label');
+          suggestions.push(`🚿 Use ${productName} as directed on product label`);
           suggestions.push('💇 Adjust frequency based on your hair\'s response');
         }
       } else if (prodType === 'face') {
         if (lowerCategory.includes('cleanser')) {
-          suggestions.push('🌡️ Use lukewarm water. Hot water strips natural oils, cold doesn\'t cleanse effectively');
+          suggestions.push(`🌡️ Use ${productName} with lukewarm water—hot water strips oils, cold water doesn't cleanse well`);
           suggestions.push('⏱️ Massage for 60 seconds to properly dissolve makeup and sunscreen');
           suggestions.push('🌙 Double cleanse at night if wearing makeup or sunscreen');
         } else if (lowerCategory.includes('moisturizer') || lowerCategory.includes('cream')) {
-          suggestions.push('💧 Apply to damp skin for better absorption (pat dry, don\'t rub)');
+          suggestions.push(`💧 Apply ${productName} to damp skin for better absorption (pat dry, don't rub)`);
           suggestions.push('⬆️ Use upward motions. Don\'t forget neck and décolletage');
           suggestions.push('☀️ If no SPF, always apply sunscreen after moisturizer in AM');
         } else if (lowerCategory.includes('oil')) {
-          suggestions.push('🌙 Oils work best as last step in PM routine to seal in moisture');
+          suggestions.push(`🌙 Use ${productName} as last step in PM routine to seal in moisture`);
           suggestions.push('💧 Mix 2-3 drops with moisturizer if pure oil feels too heavy');
           suggestions.push('⚠️ Avoid if using water-based sunscreen in AM—oil can break down SPF');
+        } else if (lowerCategory.includes('serum') && activesText) {
+          suggestions.push(`✨ Apply ${productName} after cleansing to target ${profile?.skin_concerns?.[0]?.replace(/-/g, ' ') || 'your concerns'}`);
+          suggestions.push(`💧 Use with ${activesText} for best results—apply on damp skin`);
+          suggestions.push('🧴 Follow with moisturizer to seal in the actives');
+        } else if (lowerCategory.includes('toner') || lowerCategory.includes('pad')) {
+          const concernText = profile?.skin_concerns?.[0] ? ` to address ${profile.skin_concerns[0].replace(/-/g, ' ')}` : '';
+          suggestions.push(`🌙 Use ${productName} in your ${activesText.includes('aha') || activesText.includes('bha') ? 'PM' : 'AM & PM'} routine after cleansing${concernText}`);
+          if (lowerCategory.includes('pad')) {
+            suggestions.push('💧 Apply the pad directly to problem areas where concerns are most visible');
+            if (activesText.includes('aha') || activesText.includes('bha') || activesText.includes('acid')) {
+              suggestions.push('⏱️ Use 2-3 times per week initially—exfoliating acids can increase sensitivity with daily use');
+            }
+          } else {
+            suggestions.push('💧 Pat gently or use sweeping motions—no need to rinse');
+          }
         } else {
-          suggestions.push('✨ Perform patch test before first full use');
-          suggestions.push('🧴 Use consistently as part of your routine');
+          suggestions.push(`✨ Use ${productName} consistently as part of your routine`);
+          suggestions.push('🧴 Perform patch test before first full use');
         }
       }
       
@@ -945,7 +981,7 @@ serve(async (req) => {
 
     // STEP 1: Start with general product guidance based on category (most reliable)
     let routineSuggestions = [
-      ...getGeneralProductGuidance(productCategory, productType, profile),
+      ...getGeneralProductGuidance(productCategory, productType, profile, product_name, detectedActives),
     ];
 
     // STEP 2: Add active-specific guidance if available
@@ -965,6 +1001,13 @@ serve(async (req) => {
     // STEP 5: Add active-specific tips if space permits (ONLY actionable routine advice)
     for (const active of detectedActives.slice(0, 2)) {
       if (active.info.tips && routineSuggestions.length < 8) {
+        // FILTER BY PRODUCT TYPE - only show tips relevant to this product category
+        const productTypes = active.info.product_types || [];
+        if (productTypes.length > 0 && !productTypes.includes(productType)) {
+          console.log(`Skipping ${active.name} tips - not relevant for ${productType} products (valid for: ${productTypes.join(', ')})`);
+          continue;
+        }
+        
         // Filter out non-actionable tips (ingredient facts, descriptions)
         const actionableTips = active.info.tips.filter((tip: string) => {
           const lowerTip = tip.toLowerCase();
