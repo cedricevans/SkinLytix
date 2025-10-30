@@ -274,6 +274,7 @@ export type Database = {
           id: string
           ingredients_list: string
           product_name: string
+          product_price: number | null
           recommendations_json: Json | null
           user_id: string
         }
@@ -285,6 +286,7 @@ export type Database = {
           id?: string
           ingredients_list: string
           product_name: string
+          product_price?: number | null
           recommendations_json?: Json | null
           user_id: string
         }
@@ -296,6 +298,7 @@ export type Database = {
           id?: string
           ingredients_list?: string
           product_name?: string
+          product_price?: number | null
           recommendations_json?: Json | null
           user_id?: string
         }

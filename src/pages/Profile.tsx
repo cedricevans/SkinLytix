@@ -360,17 +360,42 @@ const Profile = () => {
       const analysis = allAnalyses.find(a => a.id === analysisId);
       if (!analysis) throw new Error("Product not found");
 
-      // Add to routine
+      // Check if product is already in routine (prevent duplicates)
+      const { data: existing } = await supabase
+        .from('routine_products')
+        .select('id')
+        .eq('routine_id', routine.id)
+        .eq('analysis_id', analysisId)
+        .maybeSingle();
+
+      if (existing) {
+        toast({
+          title: "Already in routine",
+          description: `${analysis.product_name} is already in your routine`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Add to routine (no price needed - stored in user_analyses)
       const { error } = await supabase
         .from('routine_products')
         .insert({
           routine_id: routine.id,
           analysis_id: analysisId,
-          product_price: 0,
-          usage_frequency: 'daily'
+          usage_frequency: 'Both' // Fixed: Use valid value (AM/PM/Both)
         });
 
       if (error) throw error;
+
+      trackEvent({
+        eventName: 'product_added_to_routine_from_profile',
+        eventCategory: 'profile',
+        eventProperties: { 
+          epiq_score: analysis.epiq_score,
+          has_price: !!analysis.product_price
+        }
+      });
 
       toast({
         title: "Added to routine!",

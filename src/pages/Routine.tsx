@@ -25,11 +25,13 @@ interface RoutineProduct {
   analysis_id: string;
   usage_frequency: string;
   product_price: number | null;
+  category?: string;
   user_analyses: {
     product_name: string;
     brand?: string;
     category?: string;
     epiq_score: number;
+    product_price?: number | null;
   };
 }
 
@@ -109,7 +111,8 @@ export default function Routine() {
             product_name,
             brand,
             category,
-            epiq_score
+            epiq_score,
+            product_price
           )
         `)
         .eq("routine_id", currentRoutineId);
@@ -144,7 +147,9 @@ export default function Routine() {
   const handleEditProduct = (routineProduct: RoutineProduct) => {
     setEditingProductId(routineProduct.id);
     setSelectedAnalysisId(routineProduct.analysis_id);
-    setProductPrice(routineProduct.product_price?.toString() || "");
+    setProductPrice(
+      (routineProduct.user_analyses?.product_price || routineProduct.product_price)?.toString() || ""
+    );
     setUsageFrequency(routineProduct.usage_frequency);
     setProductCategory((routineProduct as any).category || "");
     setShowPriceDialog(true);
@@ -179,16 +184,27 @@ export default function Routine() {
   const handleAddProduct = async () => {
     if (!routineId || !selectedAnalysisId) return;
 
-    const price = parseFloat(productPrice) || 0;
+    const price = parseFloat(productPrice) || null;
 
     try {
+      // Update price in user_analyses (permanent storage)
+      if (price !== null && price > 0) {
+        const { error: priceError } = await supabase
+          .from("user_analyses")
+          .update({ product_price: price })
+          .eq("id", selectedAnalysisId);
+        
+        if (priceError) {
+          console.error("Error updating price:", priceError);
+        }
+      }
+
       if (editingProductId) {
-        // Update existing product
+        // Update existing product (frequency & category only)
         const { error } = await supabase
           .from("routine_products")
           .update({
             usage_frequency: usageFrequency,
-            product_price: price,
             category: productCategory || null,
           })
           .eq("id", editingProductId);
@@ -203,7 +219,6 @@ export default function Routine() {
             routine_id: routineId,
             analysis_id: selectedAnalysisId,
             usage_frequency: usageFrequency,
-            product_price: price,
             category: productCategory || null,
           });
 
@@ -214,7 +229,7 @@ export default function Routine() {
           eventCategory: 'routine',
           eventProperties: { 
             usageFrequency,
-            hasPrice: price > 0
+            hasPrice: price !== null && price > 0
           }
         });
         
@@ -342,7 +357,7 @@ export default function Routine() {
   };
 
   const totalCost = routineProducts.reduce(
-    (sum, p) => sum + (p.product_price || 0),
+    (sum, p) => sum + (p.user_analyses?.product_price || p.product_price || 0),
     0
   );
 
@@ -487,7 +502,7 @@ export default function Routine() {
                         </span>
                         <span className="text-sm text-muted-foreground">•</span>
                         <span className="text-sm text-muted-foreground">
-                          ${rp.product_price || 0}
+                          ${(rp.user_analyses?.product_price || rp.product_price || 0).toFixed(2)}
                         </span>
                       </div>
                     </div>

@@ -70,6 +70,7 @@ const Upload = () => {
   const [ocrProgress, setOcrProgress] = useState(0);
   const [useAIExtraction, setUseAIExtraction] = useState(true);
   const [productType, setProductType] = useState<'face' | 'body' | 'hair' | 'auto'>('auto');
+  const [productPrice, setProductPrice] = useState("");
 
   const handleImageUpload = async (file: File) => {
     trackEvent({
@@ -243,6 +244,7 @@ const Upload = () => {
           brand: brand || null,
           category: category || null,
           ingredients_list: ingredientsList,
+          product_price: productPrice ? parseFloat(productPrice) : null,
           user_id: user.id
         }
       });
@@ -484,6 +486,35 @@ const Upload = () => {
                 onChange={(e) => setCategory(e.target.value)}
                 placeholder="e.g., serum, moisturizer, cleanser"
               />
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Label htmlFor="price">Price (Optional)</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>How much did this product cost? This helps track your routine expenses and find budget-friendly alternatives.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  $
+                </span>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={productPrice}
+                  onChange={(e) => setProductPrice(e.target.value)}
+                  placeholder="24.99"
+                  className="pl-7"
+                />
+              </div>
             </div>
 
             <div>

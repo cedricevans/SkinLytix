@@ -129,14 +129,13 @@ const Analysis = () => {
         routineId = newRoutine!.id;
       }
 
-      // Add product to routine
+      // Add product to routine (no price needed - stored in user_analyses)
       const { error } = await supabase
         .from("routine_products")
         .insert({
           routine_id: routineId,
           analysis_id: id,
           usage_frequency: "Both",
-          product_price: 0,
         });
 
       if (error) throw error;
