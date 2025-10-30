@@ -3,7 +3,7 @@ import { Award, Users, FlaskConical, Shield } from "lucide-react";
 const signals = [
   {
     icon: FlaskConical,
-    stat: "PubMed Validated",
+    stat: "PubChem Validated",
     description: "Every recommendation backed by scientific research"
   },
   {
