@@ -223,6 +223,18 @@ Provide a comprehensive analysis covering:
 2. CONFLICTING ACTIVES: Flag combinations that may cause irritation or reduce effectiveness
 3. FORMULATION ISSUES: Point out problematic ingredients
 4. COST OPTIMIZATION: Suggest alternatives with NUMERIC savings
+   
+   **CRITICAL REQUIREMENT FOR COST OPTIMIZATIONS:**
+   - "potentialSavings" MUST be a numeric value (e.g., 20.00, 35.50, 150.00)
+   - DO NOT use text descriptions like "High", "Significant", "potentially hundreds"
+   - Calculate as: currentPrice - alternativePrice
+   - If exact price is unknown, estimate a realistic numeric value
+   - Examples:
+     ✅ CORRECT: "potentialSavings": 25.00
+     ✅ CORRECT: "potentialSavings": 150.00
+     ❌ WRONG: "potentialSavings": "Significant, potentially hundreds of dollars"
+     ❌ WRONG: "potentialSavings": "High"
+
 5. ROUTINE EFFICIENCY: Recommend which products could be eliminated
 
 ${unknownProducts.length > 0 ? `

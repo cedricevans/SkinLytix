@@ -146,7 +146,15 @@ const Profile = () => {
             if (Array.isArray(costOpts)) {
               costOpts.forEach((costOpt: any) => {
                 if (costOpt.potentialSavings) {
-                  totalSavings += parseFloat(costOpt.potentialSavings);
+                  // Try to parse as number, handling both numeric and text values
+                  const savings = typeof costOpt.potentialSavings === 'number' 
+                    ? costOpt.potentialSavings 
+                    : parseFloat(costOpt.potentialSavings);
+                  
+                  // Only add if it's a valid number greater than 0
+                  if (!isNaN(savings) && savings > 0) {
+                    totalSavings += savings;
+                  }
                 }
               });
             }
@@ -542,11 +550,13 @@ const Profile = () => {
                     <DollarSign className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Savings</p>
+                    <p className="text-sm text-muted-foreground">Total Potential Savings</p>
                     {isLoadingStats ? (
-                      <p className="text-2xl font-bold">-</p>
+                      <p className="text-2xl font-bold text-muted-foreground">-</p>
+                    ) : stats.totalSavings > 0 ? (
+                      <p className="text-2xl font-bold text-green-600">${stats.totalSavings.toFixed(2)}</p>
                     ) : (
-                      <p className="text-2xl font-bold">${stats.totalSavings.toFixed(2)}</p>
+                      <p className="text-sm text-muted-foreground">No optimizations yet</p>
                     )}
                   </div>
                 </div>
