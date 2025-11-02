@@ -354,10 +354,56 @@ const Upload = () => {
             </p>
           </div>
 
+          {/* Instructional Banner - What to Photograph */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <Camera className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 space-y-2">
+                <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                  📸 Photograph the Ingredient List Label
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                  Find where the ingredients are listed on your product packaging (back label, side of tube, box flap, bottle, etc.) and take a clear, well-lit photo of that text.
+                </p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 italic">
+                  💡 We analyze the ingredient text you photograph — we don't look up products by name or barcode.
+                </p>
+              </div>
+            </div>
+            
+            {/* Collapsible Tips Section */}
+            <details className="text-xs text-blue-700 dark:text-blue-300">
+              <summary className="cursor-pointer font-medium hover:text-blue-900 dark:hover:text-blue-100 select-none">
+                💡 Tips for best results (tap to expand)
+              </summary>
+              <ul className="mt-2 space-y-1 pl-4 list-disc marker:text-blue-500">
+                <li><strong>Good lighting</strong> — Avoid shadows and glare</li>
+                <li><strong>Hold steady</strong> — Focus on the ingredient text</li>
+                <li><strong>Full list</strong> — Include the complete ingredient list in frame</li>
+                <li><strong>Common locations:</strong> Back of bottle, side of tube, inside box flap, bottom of jar</li>
+                <li><strong>Multiple languages?</strong> Photograph the English ingredient list if available</li>
+              </ul>
+            </details>
+          </div>
+
           {/* Image Upload */}
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-2">
-              <Label>Product Photo</Label>
+              <Label className="flex items-center gap-2 flex-wrap">
+                <span className="flex items-center gap-1.5">
+                  📋 Ingredient List Photo
+                </span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p className="text-xs leading-relaxed">
+                      Take a photo of <strong>where the ingredients are listed</strong> on your product packaging. The app extracts and analyzes the ingredient text from your photo — it doesn't automatically look up products by name or barcode.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </Label>
               <div className="flex items-center gap-2">
                 <Label htmlFor="ai-extraction" className="text-sm font-normal cursor-pointer">
                   AI Extraction (Recommended)
@@ -414,8 +460,23 @@ const Upload = () => {
 
           {/* Image Preview */}
           {productImage && (
-            <div className="rounded-lg overflow-hidden border">
-              <img src={productImage} alt="Product" className="w-full h-auto" />
+            <div className="space-y-2">
+              <div className="rounded-lg overflow-hidden border">
+                <img src={productImage} alt="Ingredient list preview" className="w-full h-auto" />
+              </div>
+              <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                <div className="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                  ✓
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-green-900 dark:text-green-100">
+                    Ingredient list photo uploaded
+                  </p>
+                  <p className="text-xs text-green-700 dark:text-green-300 mt-0.5">
+                    Review the extracted text below and make any corrections before analyzing.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -525,7 +586,11 @@ const Upload = () => {
                     <Info className="w-4 h-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
-                    <p>Upload a photo of your product's ingredient list or type it manually. We'll extract and analyze each ingredient for safety and compatibility with your skin profile.</p>
+                    <p className="text-xs leading-relaxed">
+                      <strong>From photo:</strong> We extract the ingredient text automatically.<br/>
+                      <strong>Manual entry:</strong> Type ingredients separated by commas.<br/><br/>
+                      We analyze each ingredient for safety and compatibility with your skin profile.
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </div>
