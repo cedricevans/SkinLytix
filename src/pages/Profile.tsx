@@ -39,7 +39,6 @@ interface ProfileStats {
     lastUsed: string;
   } | null;
   totalSavings: number;
-  totalProductsScanned: number;
   recommendationsAvailable: number;
 }
 
@@ -56,7 +55,6 @@ const Profile = () => {
     totalAnalyses: 0,
     latestRoutine: null,
     totalSavings: 0,
-    totalProductsScanned: 0,
     recommendationsAvailable: 0
   });
   const [isLoadingStats, setIsLoadingStats] = useState(true);
@@ -176,7 +174,6 @@ const Profile = () => {
           lastUsed: new Date(routineData.updated_at).toLocaleDateString()
         } : null,
         totalSavings,
-        totalProductsScanned: analysesCount || 0,
         recommendationsAvailable: recommendationsCount
       });
     } catch (error) {
@@ -578,22 +575,6 @@ const Profile = () => {
                       <p className="text-2xl font-bold text-green-600">${stats.totalSavings.toFixed(2)}</p>
                     ) : (
                       <p className="text-sm text-muted-foreground">No recommendations yet</p>
-                    )}
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <ScanLine className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Products Scanned</p>
-                    {isLoadingStats ? (
-                      <p className="text-2xl font-bold text-muted-foreground">-</p>
-                    ) : (
-                      <p className="text-2xl font-bold">{stats.totalProductsScanned}</p>
                     )}
                   </div>
                 </div>
