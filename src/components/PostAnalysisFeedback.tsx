@@ -79,9 +79,17 @@ const PostAnalysisFeedback = ({ analysisId }: PostAnalysisFeedbackProps) => {
         }
       });
 
+      const responseMessages = {
+        low: "🔍 We're reviewing your concerns - our team will investigate these issues.",
+        mid: "💪 Thanks for the feedback! We're working to improve your experience.",
+        high: "🎉 So glad it helped! Share with friends who could benefit too!"
+      };
+
+      const messageType = ratingValue <= 2 ? 'low' : ratingValue <= 3 ? 'mid' : 'high';
+
       toast({
-        title: "Thank you!",
-        description: "Your feedback helps us improve.",
+        title: ratingValue <= 2 ? "Feedback received" : "Thanks for your rating! ⭐",
+        description: responseMessages[messageType],
       });
 
       setHasSubmitted(true);

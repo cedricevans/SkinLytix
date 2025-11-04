@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Droplets, Wind, Flame, Shield, Sparkles, Home, ArrowLeft, User, TrendingUp, Calendar, DollarSign, Edit2, ChevronDown, ScanLine, Plus, History, Search, Info } from "lucide-react";
+import { Droplets, Wind, Flame, Shield, Sparkles, Home, ArrowLeft, User, TrendingUp, Calendar, DollarSign, Edit2, ChevronDown, ScanLine, Plus, History, Search, Info, MessageSquare } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTracking, trackEvent } from "@/hooks/useTracking";
 
@@ -67,13 +67,31 @@ const Profile = () => {
   const [loadingRoutines, setLoadingRoutines] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [scoreFilter, setScoreFilter] = useState<"all" | "excellent" | "good" | "attention">("all");
+  const [feedbackCount, setFeedbackCount] = useState(0);
 
   useEffect(() => {
     fetchProfile();
     fetchStats();
     fetchAllAnalyses();
     fetchAllRoutines();
+    fetchFeedbackCount();
   }, []);
+
+  const fetchFeedbackCount = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { count } = await supabase
+        .from('feedback')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      setFeedbackCount(count || 0);
+    } catch (error) {
+      console.error('Error fetching feedback count:', error);
+    }
+  };
 
   const fetchProfile = async () => {
     setIsLoading(true);
@@ -624,6 +642,25 @@ const Profile = () => {
                       <p className="text-2xl font-bold">{stats.recommendationsAvailable}</p>
                     ) : (
                       <p className="text-sm text-muted-foreground">None yet</p>
+                    )}
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-primary/20 rounded-lg">
+                    <MessageSquare className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Your Impact</p>
+                    {feedbackCount > 0 ? (
+                      <>
+                        <p className="text-2xl font-bold">🎯 {feedbackCount}</p>
+                        <p className="text-xs text-muted-foreground">feedback{feedbackCount !== 1 ? 's' : ''} submitted</p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No feedback yet</p>
                     )}
                   </div>
                 </div>
