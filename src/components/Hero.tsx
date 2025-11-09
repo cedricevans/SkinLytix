@@ -86,19 +86,9 @@ const Hero = () => {
             className="touch-target text-base px-6 sm:px-8 py-5 md:py-6 h-auto w-full sm:w-auto border-2 border-accent/50 hover:border-accent hover:bg-accent/10 order-2"
             onClick={() => navigate('/auth')}
           >
-            <span className="hidden sm:inline">Start Your First Analysis</span>
+            <span className="hidden sm:inline">Sign Up Free</span>
             <span className="sm:hidden">Sign Up Free</span>
             <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="touch-target text-base px-6 sm:px-8 py-5 md:py-6 h-auto w-full sm:w-auto border-primary/30 hover:border-primary hover:bg-primary/5 order-3"
-            onClick={() => {
-              document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            See How It Works
           </Button>
         </div>
 
