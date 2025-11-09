@@ -84,7 +84,14 @@ const Hero = () => {
             variant="secondary" 
             size="lg" 
             className="touch-target text-base px-6 sm:px-8 py-5 md:py-6 h-auto w-full sm:w-auto border-2 border-accent/50 hover:border-accent hover:bg-accent/10 order-2"
-            onClick={() => navigate('/auth')}
+            onClick={() => {
+              trackEvent({
+                eventName: 'signup_cta_clicked',
+                eventCategory: 'conversion',
+                eventProperties: { location: 'hero', text: 'Sign Up Free' }
+              });
+              navigate('/auth');
+            }}
           >
             <span className="hidden sm:inline">Sign Up Free</span>
             <span className="sm:hidden">Sign Up Free</span>
