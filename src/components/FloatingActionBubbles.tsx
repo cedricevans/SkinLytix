@@ -24,31 +24,31 @@ export const FloatingActionBubbles = ({
       icon: Home,
       label: "Home",
       position: "top-4 left-4",
-      gradient: "from-primary to-primary-glow",
+      gradient: "from-[hsl(197,75%,24%)] to-[hsl(197,75%,32%)]",
       action: () => navigate('/'),
+      show: true,
+    },
+    {
+      icon: Microscope,
+      label: "Analyze Another",
+      position: "top-20 left-4",
+      gradient: "from-[hsl(192,51%,48%)] to-[hsl(192,51%,56%)]",
+      action: () => navigate('/upload'),
       show: true,
     },
     {
       icon: Plus,
       label: "Add to Routine",
-      position: "top-20 right-4",
-      gradient: "from-accent to-accent/80",
+      position: "top-36 left-4",
+      gradient: "from-[hsl(197,75%,28%)] to-[hsl(192,51%,48%)]",
       action: onAddToRoutine,
       show: showAddToRoutine && !!onAddToRoutine,
-    },
-    {
-      icon: Microscope,
-      label: "Analyze Another",
-      position: "top-4 right-4",
-      gradient: "from-secondary to-secondary/80",
-      action: () => navigate('/upload'),
-      show: true,
     },
     {
       icon: TrendingUp,
       label: "Optimize Routine",
       position: "bottom-4 left-4",
-      gradient: "from-primary-glow to-primary",
+      gradient: "from-[hsl(192,51%,52%)] to-[hsl(192,51%,44%)]",
       action: () => navigate('/routine'),
       show: true,
     },
@@ -68,7 +68,7 @@ export const FloatingActionBubbles = ({
               <button
                 onClick={bubble.action}
                 className={cn(
-                  "fixed z-50 w-14 h-14 md:w-16 md:h-16 rounded-full",
+                  "fixed z-50 w-10 h-10 md:w-12 md:h-12 rounded-full",
                   "bg-gradient-to-br shadow-elegant",
                   "flex items-center justify-center",
                   "transition-all duration-300 hover:scale-110 hover:shadow-glow",
@@ -80,7 +80,7 @@ export const FloatingActionBubbles = ({
                   animationDelay: `${index * 100}ms`,
                 }}
               >
-                <Icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
+                <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </button>
             </TooltipTrigger>
             <TooltipContent>
