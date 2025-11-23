@@ -38,8 +38,8 @@ export const IngredientRiskHeatmap = ({ ingredients, onIngredientClick }: Ingred
           </p>
         </div>
       </div>
-      <div className="relative bg-gradient-to-br from-card to-card/50 rounded-xl p-8 border border-border shadow-elegant backdrop-blur-sm">
-        <div className="grid grid-cols-6 md:grid-cols-10 gap-3 md:gap-4">
+      <div className="relative bg-gradient-to-br from-card to-card/50 rounded-xl p-4 md:p-6 lg:p-8 border border-border shadow-elegant backdrop-blur-sm">
+        <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-10 gap-2 md:gap-3 lg:gap-4">
           {ingredients.map((ingredient, index) => {
             const riskScore = ingredient.risk_score || 
               (ingredient.category === 'problematic' ? 85 :
@@ -76,7 +76,7 @@ export const IngredientRiskHeatmap = ({ ingredients, onIngredientClick }: Ingred
             );
           })}
         </div>
-        <div className="mt-6 flex items-center justify-center gap-8 text-sm">
+        <div className="mt-4 md:mt-6 flex flex-wrap items-center justify-center gap-4 md:gap-8 text-xs md:text-sm">
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-md"></div>
             <span className="font-medium">Low Risk</span>

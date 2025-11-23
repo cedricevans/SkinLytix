@@ -56,6 +56,7 @@ export const FloatingActionBubbles = ({
 
   return (
     <TooltipProvider>
+      <div className="hidden md:block">
       {bubbles.map((bubble, index) => {
         if (!bubble.show) return null;
         
@@ -88,6 +89,7 @@ export const FloatingActionBubbles = ({
           </Tooltip>
         );
       })}
+      </div>
     </TooltipProvider>
   );
 };
