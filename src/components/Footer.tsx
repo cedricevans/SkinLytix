@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import { Heart, Instagram, Twitter, Facebook, Linkedin } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -14,6 +14,62 @@ const Footer = () => {
             </p>
           </div>
 
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-sm font-heading font-semibold mb-3 text-primary-foreground">Quick Links</h4>
+            <ul className="space-y-2 text-sm font-body">
+              <li><a href="/about" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">About Us</a></li>
+              <li><a href="/how-it-works" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">How It Works</a></li>
+              <li><a href="/faq" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">FAQ</a></li>
+              <li><a href="/contact" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">Contact</a></li>
+            </ul>
+          </div>
+
+          {/* Social Media */}
+          <div>
+            <h4 className="text-sm font-heading font-semibold mb-3 text-primary-foreground">Connect With Us</h4>
+            <div className="flex gap-3 mb-3">
+              <a 
+                href="https://instagram.com/skinlytix" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center transition-all hover:scale-110"
+                aria-label="Follow us on Instagram"
+              >
+                <Instagram className="w-5 h-5 text-primary-foreground" />
+              </a>
+              <a 
+                href="https://twitter.com/skinlytix" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center transition-all hover:scale-110"
+                aria-label="Follow us on Twitter"
+              >
+                <Twitter className="w-5 h-5 text-primary-foreground" />
+              </a>
+              <a 
+                href="https://facebook.com/skinlytix" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center transition-all hover:scale-110"
+                aria-label="Follow us on Facebook"
+              >
+                <Facebook className="w-5 h-5 text-primary-foreground" />
+              </a>
+              <a 
+                href="https://linkedin.com/company/skinlytix" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center transition-all hover:scale-110"
+                aria-label="Follow us on LinkedIn"
+              >
+                <Linkedin className="w-5 h-5 text-primary-foreground" />
+              </a>
+            </div>
+            <p className="text-xs text-primary-foreground/60">
+              Join our community for skincare tips, product reviews, and exclusive insights.
+            </p>
+          </div>
         </div>
 
         {/* Bottom Bar */}
