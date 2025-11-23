@@ -1,4 +1,4 @@
-import { Heart, Instagram, Twitter, Facebook, Linkedin } from "lucide-react";
+import { Heart, Instagram, Twitter, Facebook } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -30,7 +30,7 @@ const Footer = () => {
             <h4 className="text-sm font-heading font-semibold mb-3 text-primary-foreground">Connect With Us</h4>
             <div className="flex gap-3 mb-3">
               <a 
-                href="https://instagram.com/skinlytix" 
+                href="https://www.instagram.com/skinlytix?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center transition-all hover:scale-110"
@@ -39,16 +39,16 @@ const Footer = () => {
                 <Instagram className="w-5 h-5 text-primary-foreground" />
               </a>
               <a 
-                href="https://twitter.com/skinlytix" 
+                href="https://www.threads.com/@skinlytix" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center transition-all hover:scale-110"
-                aria-label="Follow us on Twitter"
+                aria-label="Follow us on Threads"
               >
                 <Twitter className="w-5 h-5 text-primary-foreground" />
               </a>
               <a 
-                href="https://facebook.com/skinlytix" 
+                href="https://www.facebook.com/profile.php?id=61574847090738" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center transition-all hover:scale-110"
@@ -56,18 +56,9 @@ const Footer = () => {
               >
                 <Facebook className="w-5 h-5 text-primary-foreground" />
               </a>
-              <a 
-                href="https://linkedin.com/company/skinlytix" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 flex items-center justify-center transition-all hover:scale-110"
-                aria-label="Follow us on LinkedIn"
-              >
-                <Linkedin className="w-5 h-5 text-primary-foreground" />
-              </a>
             </div>
             <p className="text-xs text-primary-foreground/60">
-              Join our community for skincare tips, product reviews, and exclusive insights.
+              Join our community on Instagram, Threads, and Facebook for skincare tips and insights.
             </p>
           </div>
         </div>

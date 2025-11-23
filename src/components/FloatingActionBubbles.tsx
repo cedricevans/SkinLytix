@@ -1,4 +1,4 @@
-import { Home, Plus, Microscope, TrendingUp } from "lucide-react";
+import { Home, Plus, Microscope, TrendingUp, Bug } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -29,17 +29,9 @@ export const FloatingActionBubbles = ({
       show: true,
     },
     {
-      icon: Microscope,
-      label: "Analyze Another",
-      position: "top-20 left-4",
-      gradient: "from-[hsl(192,51%,48%)] to-[hsl(192,51%,56%)]",
-      action: () => navigate('/upload'),
-      show: true,
-    },
-    {
       icon: Plus,
       label: "Add to Routine",
-      position: "top-36 left-4",
+      position: "top-20 left-4",
       gradient: "from-[hsl(197,75%,28%)] to-[hsl(192,51%,48%)]",
       action: onAddToRoutine,
       show: showAddToRoutine && !!onAddToRoutine,
@@ -47,9 +39,25 @@ export const FloatingActionBubbles = ({
     {
       icon: TrendingUp,
       label: "Optimize Routine",
-      position: "bottom-4 left-4",
+      position: "top-36 left-4",
       gradient: "from-[hsl(192,51%,52%)] to-[hsl(192,51%,44%)]",
       action: () => navigate('/routine'),
+      show: true,
+    },
+    {
+      icon: Microscope,
+      label: "Analyze Another",
+      position: "top-52 left-4",
+      gradient: "from-[hsl(192,51%,48%)] to-[hsl(192,51%,56%)]",
+      action: () => navigate('/upload'),
+      show: true,
+    },
+    {
+      icon: Bug,
+      label: "Report Bug",
+      position: "top-[17rem] left-4",
+      gradient: "from-[hsl(197,75%,30%)] to-[hsl(192,51%,42%)]",
+      action: () => window.open('https://forms.gle/your-bug-report-form', '_blank'),
       show: true,
     },
   ];
