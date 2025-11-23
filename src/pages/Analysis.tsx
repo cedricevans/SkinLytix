@@ -16,6 +16,7 @@ import { AnimatedScoreGauge } from "@/components/AnimatedScoreGauge";
 import { SafetyLevelMeter } from "@/components/SafetyLevelMeter";
 import { ProfessionalReferralBanner } from "@/components/ProfessionalReferralBanner";
 import { FloatingActionBubbles } from "@/components/FloatingActionBubbles";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { IngredientRiskHeatmap } from "@/components/IngredientRiskHeatmap";
 import { ScoreBreakdownAccordion } from "@/components/ScoreBreakdownAccordion";
 import { AIExplanationLoader } from "@/components/AIExplanationLoader";
@@ -237,14 +238,14 @@ const Analysis = () => {
           suggestedProfessionalType={analysis.recommendations_json.ai_explanation.professional_referral.suggested_professional_type}
         />
       )}
-      <main className="min-h-screen bg-gradient-to-b from-background to-muted py-12 px-4">
+      <main className="min-h-screen bg-gradient-to-b from-background to-muted py-6 md:py-12 px-4">
       <div className="container max-w-4xl mx-auto">
         
         {/* Dashboard Header */}
-        <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 rounded-xl p-6 mb-8 animate-fade-in shadow-soft border border-border/50">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 rounded-xl p-4 md:p-6 mb-6 md:mb-8 animate-fade-in shadow-soft border border-border/50">
+          <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2">{analysis.product_name}</h1>
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">{analysis.product_name}</h1>
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 {analysis.brand && <span className="font-medium">{analysis.brand}</span>}
                 {analysis.brand && analysis.category && <span>•</span>}
@@ -257,74 +258,54 @@ const Analysis = () => {
                 <span>Analyzed {new Date(analysis.analyzed_at).toLocaleDateString()}</span>
               </div>
             </div>
-            <div className="flex gap-3">
-              <div className="flex flex-col items-center justify-center px-3 py-2 bg-card rounded-lg shadow-md border border-border min-w-[70px]">
-                <span className="text-xl mb-1">🧪</span>
-                <span className="text-[10px] text-muted-foreground">Ingredients</span>
-                <span className="text-base font-bold">
+            <div className="grid grid-cols-3 gap-2 md:gap-3">
+              <div className="flex flex-col items-center justify-center px-2 md:px-3 py-2 bg-card rounded-lg shadow-md border border-border">
+                <span className="text-lg md:text-xl mb-1">🧪</span>
+                <span className="text-[9px] md:text-[10px] text-muted-foreground">Ingredients</span>
+                <span className="text-sm md:text-base font-bold">
                   {(analysis.recommendations_json.safe_ingredients?.length || 0) +
                    (analysis.recommendations_json.problematic_ingredients?.length || 0) +
                    (analysis.recommendations_json.beneficial_ingredients?.length || 0) +
                    ((analysis.recommendations_json as any).concern_ingredients?.length || 0)}
                 </span>
               </div>
-              <div className="flex flex-col items-center justify-center px-3 py-2 bg-card rounded-lg shadow-md border border-border min-w-[70px]">
-                <span className="text-xl mb-1">✅</span>
-                <span className="text-[10px] text-muted-foreground">Safe</span>
-                <span className="text-base font-bold">{analysis.recommendations_json.safe_ingredients?.length || 0}</span>
+              <div className="flex flex-col items-center justify-center px-2 md:px-3 py-2 bg-card rounded-lg shadow-md border border-border">
+                <span className="text-lg md:text-xl mb-1">✅</span>
+                <span className="text-[9px] md:text-[10px] text-muted-foreground">Safe</span>
+                <span className="text-sm md:text-base font-bold">{analysis.recommendations_json.safe_ingredients?.length || 0}</span>
               </div>
-              <div className="flex flex-col items-center justify-center px-3 py-2 bg-card rounded-lg shadow-md border border-border min-w-[70px]">
-                <span className="text-xl mb-1">⚠️</span>
-                <span className="text-[10px] text-muted-foreground">Concerns</span>
-                <span className="text-base font-bold">{analysis.recommendations_json.problematic_ingredients?.length || 0}</span>
+              <div className="flex flex-col items-center justify-center px-2 md:px-3 py-2 bg-card rounded-lg shadow-md border border-border">
+                <span className="text-lg md:text-xl mb-1">⚠️</span>
+                <span className="text-[9px] md:text-[10px] text-muted-foreground">Concerns</span>
+                <span className="text-sm md:text-base font-bold">{analysis.recommendations_json.problematic_ingredients?.length || 0}</span>
               </div>
             </div>
           </div>
         </div>
         
-        <div className="flex items-center justify-between mb-8">
+        <div className="hidden md:flex items-center justify-between mb-6 md:mb-8">
           <Button variant="ghost" onClick={() => navigate('/')}>
             <Home className="w-4 h-4 mr-2" />
             Back to Home
           </Button>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button
-              variant="cta"
-              onClick={() => navigate('/routine')}
-              className="touch-target w-full sm:w-auto"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Routine & Find Savings
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleAddToRoutine}
-              disabled={addingToRoutine}
-              className="touch-target w-full sm:w-auto"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {addingToRoutine ? "Adding..." : "Add to Routine"}
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                trackEvent({
-                  eventName: 'analyze_another_clicked',
-                  eventCategory: 'analysis',
-                  eventProperties: {}
-                });
-                navigate('/upload');
-              }}
-              className="touch-target w-full sm:w-auto"
-            >
-              <ScanLine className="w-4 h-4 mr-2" />
-              Analyze Another
-            </Button>
-          </div>
+        </div>
+
+        {/* Mobile-only Primary CTA */}
+        <div className="md:hidden mb-4">
+          <Button
+            variant="cta"
+            onClick={handleAddToRoutine}
+            disabled={addingToRoutine}
+            className="w-full touch-target"
+            size="lg"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {addingToRoutine ? "Adding..." : "Add to Routine"}
+          </Button>
         </div>
 
         {/* Routine Optimizer Info Banner */}
-        <Card className="p-6 mb-8 bg-gradient-to-r from-cta/10 via-accent/10 to-primary/10 border-cta/20">
+        <Card className="p-4 md:p-6 mb-6 md:mb-8 bg-gradient-to-r from-cta/10 via-accent/10 to-primary/10 border-cta/20">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-cta/20 rounded-lg">
               <Sparkles className="w-6 h-6 text-cta" />
@@ -346,8 +327,8 @@ const Analysis = () => {
           </div>
         </Card>
 
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">{analysis.product_name}</h1>
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">{analysis.product_name}</h1>
           <div className="flex flex-wrap gap-2 mb-2">
             {productMetadata?.product_type_label && (
               <Badge variant="default" className="text-base">
@@ -370,7 +351,7 @@ const Analysis = () => {
           </p>
         </div>
 
-        <Card className="p-8 mb-8 text-center bg-gradient-to-br from-primary/5 to-accent/5">
+        <Card className="p-4 md:p-6 lg:p-8 mb-6 md:mb-8 text-center bg-gradient-to-br from-primary/5 to-accent/5">
           <div className="flex items-center justify-center gap-2 mb-6">
             <h2 className="text-2xl font-semibold">EpiQ Score</h2>
             <Tooltip>
@@ -398,7 +379,7 @@ const Analysis = () => {
         )}
 
         {analysis.recommendations_json.personalized && (
-          <Card className="p-6 mb-8 bg-primary/5 border-primary/20">
+          <Card className="p-4 md:p-6 mb-6 md:mb-8 bg-primary/5 border-primary/20">
             <div className="flex items-center gap-3">
               <Sparkles className="w-6 h-6 text-primary" />
               <div className="flex-1">
@@ -423,8 +404,8 @@ const Analysis = () => {
 
         {/* AI Explanation Section - SkinLytix GPT */}
         {analysis.recommendations_json.ai_explanation && (
-          <Card className="shadow-md hover:shadow-lg transition-all mb-8 overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-b p-6">
+          <Card className="shadow-md hover:shadow-lg transition-all mb-6 md:mb-8 overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-b p-4 md:p-6">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex items-center gap-2 flex-1">
                   <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0" />
@@ -449,7 +430,7 @@ const Analysis = () => {
                 }
               />
             </div>
-            <div className="p-6">
+            <div className="p-4 md:p-6">
               {/* Professional Referral Alert (Priority Display) */}
               {analysis.recommendations_json.ai_explanation.professional_referral.needed && (
                 <Alert className="mb-6 border-amber-500 bg-amber-50 dark:bg-amber-950/20">
@@ -537,7 +518,7 @@ const Analysis = () => {
 
         {analysis.recommendations_json.problematic_ingredients &&
          analysis.recommendations_json.problematic_ingredients.length > 0 && (
-           <Card className="p-6 mb-8 border-destructive/50 bg-destructive/5">
+           <Card className="p-4 md:p-6 mb-6 md:mb-8 border-destructive/50 bg-destructive/5">
              <div className="flex items-center gap-3 mb-4">
                <AlertTriangle className="w-8 h-8 text-destructive animate-pulse" />
                <div className="flex-1">
@@ -578,8 +559,8 @@ const Analysis = () => {
           </Card>
         )}
 
-        {analysis.recommendations_json.warnings && analysis.recommendations_json.warnings.length > 0 && (
-          <Card className="p-6 mb-8 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+         {analysis.recommendations_json.warnings && analysis.recommendations_json.warnings.length > 0 && (
+          <Card className="p-4 md:p-6 mb-6 md:mb-8 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
             <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
               <div>
@@ -597,7 +578,7 @@ const Analysis = () => {
           </Card>
         )}
 
-         <Card className="p-6 mb-8">
+         <Card className="p-4 md:p-6 mb-6 md:mb-8">
            <div className="flex items-center gap-3 mb-4">
              <CheckCircle2 className="w-8 h-8 text-green-500 animate-pulse" />
              <div className="flex-1">
@@ -658,7 +639,7 @@ const Analysis = () => {
         </Card>
 
         {analysis.recommendations_json.concern_ingredients.length > 0 && (
-           <Card className="p-6 mb-8 border-amber-200 dark:border-amber-800">
+           <Card className="p-4 md:p-6 mb-6 md:mb-8 border-amber-200 dark:border-amber-800">
              <div className="flex items-center gap-3 mb-4">
                <HelpCircle className="w-8 h-8 text-amber-500 animate-pulse" />
                <div className="flex-1">
@@ -701,7 +682,7 @@ const Analysis = () => {
           </Card>
         )}
 
-         <Card className="p-6">
+         <Card className="p-4 md:p-6 mb-20 md:mb-0">
            <div className="flex items-center gap-3 mb-4">
              <Sparkles className="w-8 h-8 text-primary animate-pulse" />
              <div className="flex-1">
@@ -735,8 +716,14 @@ const Analysis = () => {
         {/* Post-Analysis Feedback */}
         <PostAnalysisFeedback analysisId={analysis.id} />
 
-        {/* Floating Action Bubbles */}
+        {/* Floating Action Bubbles - Desktop only */}
         <FloatingActionBubbles 
+          onAddToRoutine={handleAddToRoutine}
+          showAddToRoutine={true}
+        />
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav 
           onAddToRoutine={handleAddToRoutine}
           showAddToRoutine={true}
         />
