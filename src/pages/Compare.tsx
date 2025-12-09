@@ -8,9 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Search, Sparkles, DollarSign, Percent, FlaskConical } from "lucide-react";
+import { ArrowLeft, Search, Sparkles, FlaskConical } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { PaywallModal } from "@/components/paywall/PaywallModal";
+import { DupeCard } from "@/components/DupeCard";
+import { toast } from "@/hooks/use-toast";
 
 interface Analysis {
   id: string;
@@ -30,38 +32,61 @@ interface DupeMatch {
   whyDupe: string[];
 }
 
+interface SavedDupe {
+  id: string;
+  product_name: string;
+  brand: string | null;
+}
+
 export default function Compare() {
   const navigate = useNavigate();
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [savedDupes, setSavedDupes] = useState<Set<string>>(new Set());
+  const [userId, setUserId] = useState<string | null>(null);
   const { effectiveTier } = useSubscription();
 
   const dupeLimit = effectiveTier === 'pro' ? Infinity : effectiveTier === 'premium' ? 5 : 2;
 
   useEffect(() => {
-    const fetchAnalyses = async () => {
+    const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         navigate("/auth");
         return;
       }
+      setUserId(user.id);
 
-      const { data, error } = await supabase
-        .from("user_analyses")
-        .select("id, product_name, brand, epiq_score, product_price, ingredients_list, category")
-        .eq("user_id", user.id)
-        .order("analyzed_at", { ascending: false });
+      // Fetch analyses and saved dupes in parallel
+      const [analysesRes, savedRes] = await Promise.all([
+        supabase
+          .from("user_analyses")
+          .select("id, product_name, brand, epiq_score, product_price, ingredients_list, category")
+          .eq("user_id", user.id)
+          .order("analyzed_at", { ascending: false }),
+        supabase
+          .from("saved_dupes")
+          .select("id, product_name, brand")
+          .eq("user_id", user.id)
+      ]);
 
-      if (!error && data) {
-        setAnalyses(data);
-        if (data.length > 0) setSelectedProductId(data[0].id);
+      if (!analysesRes.error && analysesRes.data) {
+        setAnalyses(analysesRes.data);
+        if (analysesRes.data.length > 0) setSelectedProductId(analysesRes.data[0].id);
       }
+
+      if (!savedRes.error && savedRes.data) {
+        // Create a set of saved product names for quick lookup
+        const savedNames = new Set(savedRes.data.map(d => `${d.product_name}-${d.brand}`));
+        setSavedDupes(savedNames);
+      }
+
       setLoading(false);
     };
 
-    fetchAnalyses();
+    fetchData();
   }, [navigate]);
 
   const selectedProduct = useMemo(() => 
@@ -104,18 +129,13 @@ export default function Compare() {
           whyDupe.push(`${overlapPercent}% shared ingredients`);
         }
 
-        if (shared.length > 0) {
-          const topShared = shared.slice(0, 3).join(", ");
-          whyDupe.push(`Shares: ${topShared}`);
-        }
-
         if (priceDiff !== null && priceDiff > 0) {
-          whyDupe.push(`💰 $${priceDiff.toFixed(2)} cheaper`);
+          whyDupe.push(`$${priceDiff.toFixed(2)} cheaper`);
         }
 
         const scoreDiff = Math.abs((selectedProduct.epiq_score || 0) - (product.epiq_score || 0));
         if (scoreDiff <= 10) {
-          whyDupe.push("Similar EpiQ score tier");
+          whyDupe.push("Similar EpiQ score");
         }
 
         return {
@@ -140,6 +160,49 @@ export default function Compare() {
     return "text-red-500";
   };
 
+  const toggleSaveDupe = async (match: DupeMatch) => {
+    if (!userId || !selectedProductId) return;
+
+    const key = `${match.product.product_name}-${match.product.brand}`;
+    const isSaved = savedDupes.has(key);
+
+    if (isSaved) {
+      // Remove from favorites
+      const { error } = await supabase
+        .from("saved_dupes")
+        .delete()
+        .eq("user_id", userId)
+        .eq("product_name", match.product.product_name);
+
+      if (!error) {
+        setSavedDupes(prev => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
+        toast({ title: "Removed from favorites" });
+      }
+    } else {
+      // Add to favorites
+      const { error } = await supabase
+        .from("saved_dupes")
+        .insert({
+          user_id: userId,
+          product_name: match.product.product_name,
+          brand: match.product.brand,
+          reasons: match.whyDupe,
+          shared_ingredients: match.sharedIngredients,
+          price_estimate: match.product.product_price ? `$${match.product.product_price}` : null,
+          source_product_id: selectedProductId
+        });
+
+      if (!error) {
+        setSavedDupes(prev => new Set(prev).add(key));
+        toast({ title: "Saved to favorites ❤️" });
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -147,8 +210,8 @@ export default function Compare() {
         <div className="container mx-auto px-4 py-8 pb-24 lg:pb-8">
           <Skeleton className="h-10 w-48 mb-6" />
           <Skeleton className="h-12 w-full mb-8" />
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="aspect-[3/4] w-full" />)}
           </div>
         </div>
         <ResponsiveBottomNav />
@@ -242,95 +305,67 @@ export default function Compare() {
               </CardContent>
             </Card>
 
-            {/* Dupe Matches */}
-            <div className="space-y-4">
+            {/* Dupe Results Header */}
+            <div className="mb-4">
               <h2 className="font-semibold text-lg flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" />
                 {dupeMatches.length > 0 
                   ? `Found ${dupeMatches.length} potential dupe${dupeMatches.length > 1 ? 's' : ''}`
                   : "No dupes found"}
               </h2>
-
-              {visibleMatches.map((match, idx) => (
-                <Card 
-                  key={match.product.id} 
-                  className="overflow-hidden hover:shadow-md transition-shadow animate-fade-in"
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <Badge 
-                            variant={match.overlapPercent >= 70 ? "default" : "secondary"}
-                            className="shrink-0"
-                          >
-                            <Percent className="w-3 h-3 mr-1" />
-                            {match.overlapPercent}% match
-                          </Badge>
-                          {match.priceDiff !== null && match.priceDiff > 0 && (
-                            <Badge variant="outline" className="text-emerald-600 border-emerald-200 shrink-0">
-                              <DollarSign className="w-3 h-3 mr-0.5" />
-                              Save ${match.priceDiff.toFixed(2)}
-                            </Badge>
-                          )}
-                        </div>
-                        <h3 className="font-semibold truncate">{match.product.product_name}</h3>
-                        <p className="text-sm text-muted-foreground">{match.product.brand}</p>
-                        
-                        {/* Why it's a dupe */}
-                        <ul className="mt-3 space-y-1">
-                          {match.whyDupe.map((reason, i) => (
-                            <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                              <span className="text-primary">•</span>
-                              {reason}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <p className={`font-bold text-xl ${getScoreColor(match.product.epiq_score)}`}>
-                          {match.product.epiq_score || "—"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">EpiQ</p>
-                        {match.product.product_price && (
-                          <p className="text-sm font-medium mt-1">
-                            ${match.product.product_price}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              {dupeMatches.length === 0 && selectedProduct && (
-                <Card className="border-dashed">
-                  <CardContent className="py-8 text-center">
-                    <p className="text-muted-foreground">
-                      No similar products found. Analyze more products to discover dupes!
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {hasMoreMatches && (
-                <Card 
-                  className="border-dashed cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => setShowPaywall(true)}
-                >
-                  <CardContent className="py-6 text-center">
-                    <p className="text-muted-foreground mb-2">
-                      +{dupeMatches.length - dupeLimit} more dupes found
-                    </p>
-                    <Button variant="outline" size="sm">
-                      Upgrade to see all
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
             </div>
+
+            {/* Beauty Retailer Grid */}
+            {visibleMatches.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {visibleMatches.map((match, idx) => {
+                  const key = `${match.product.product_name}-${match.product.brand}`;
+                  return (
+                    <div 
+                      key={match.product.id}
+                      className="animate-fade-in"
+                      style={{ animationDelay: `${idx * 50}ms` }}
+                    >
+                      <DupeCard
+                        name={match.product.product_name}
+                        brand={match.product.brand || "Unknown Brand"}
+                        priceEstimate={match.product.product_price ? `$${match.product.product_price}` : undefined}
+                        reasons={match.whyDupe}
+                        sharedIngredients={match.sharedIngredients}
+                        matchPercentage={match.overlapPercent}
+                        isSaved={savedDupes.has(key)}
+                        onToggleSave={() => toggleSaveDupe(match)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ) : selectedProduct ? (
+              <Card className="border-dashed">
+                <CardContent className="py-8 text-center">
+                  <p className="text-muted-foreground">
+                    No similar products found. Analyze more products to discover dupes!
+                  </p>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {/* Upgrade Prompt */}
+            {hasMoreMatches && (
+              <Card 
+                className="mt-6 border-dashed cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => setShowPaywall(true)}
+              >
+                <CardContent className="py-6 text-center">
+                  <p className="text-muted-foreground mb-2">
+                    +{dupeMatches.length - dupeLimit} more dupes found
+                  </p>
+                  <Button variant="outline" size="sm">
+                    Upgrade to see all
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </>
         )}
       </main>
