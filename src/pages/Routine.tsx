@@ -8,10 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Sparkles, DollarSign, AlertTriangle, Pencil, Trash2, Info, Home, ArrowLeft, User } from "lucide-react";
+import { Plus, Sparkles, DollarSign, AlertTriangle, Pencil, Trash2, Info, Home, ArrowLeft, User, Lock, Crown } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { useTracking, trackEvent } from "@/hooks/useTracking";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useUsageLimits } from "@/hooks/useUsageLimits";
+import { PaywallModal } from "@/components/paywall/PaywallModal";
+import { UsageCounter } from "@/components/paywall/UsageCounter";
 
 interface Analysis {
   id: string;
@@ -38,6 +42,9 @@ interface RoutineProduct {
 export default function Routine() {
   const navigate = useNavigate();
   useTracking('routine');
+  const { effectiveTier, canAccess } = useSubscription();
+  const { usage, incrementUsage, canUse, limits, premiumLimits, getRemainingUsage } = useUsageLimits();
+  
   const [routineName, setRoutineName] = useState("My Skincare Routine");
   const [routineId, setRoutineId] = useState<string | null>(null);
   const [routineProducts, setRoutineProducts] = useState<RoutineProduct[]>([]);
@@ -45,6 +52,8 @@ export default function Routine() {
   const [loading, setLoading] = useState(false);
   const [optimizing, setOptimizing] = useState(false);
   const [showCostDialog, setShowCostDialog] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallFeature, setPaywallFeature] = useState("");
   
   const [showPriceDialog, setShowPriceDialog] = useState(false);
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
@@ -64,6 +73,7 @@ export default function Routine() {
   const [manualCategory, setManualCategory] = useState("");
   const [manualPrice, setManualPrice] = useState("");
   const [manualFrequency, setManualFrequency] = useState("Both");
+  const [routineCount, setRoutineCount] = useState(0);
 
   useEffect(() => {
     loadRoutineAndAnalyses();
@@ -294,6 +304,20 @@ export default function Routine() {
       return;
     }
 
+    // Check subscription tier for optimization access
+    if (effectiveTier === 'free') {
+      setPaywallFeature("Routine Optimization");
+      setShowPaywall(true);
+      return;
+    }
+
+    // Check usage limits for premium users
+    if (effectiveTier === 'premium' && !canUse('routineOptimizationsUsed', 'premium')) {
+      setPaywallFeature("Routine Optimization");
+      setShowPaywall(true);
+      return;
+    }
+
     setOptimizing(true);
     try {
       const { data, error } = await supabase.functions.invoke("optimize-routine", {
@@ -302,12 +326,18 @@ export default function Routine() {
 
       if (error) throw error;
 
+      // Increment usage for premium users
+      if (effectiveTier === 'premium') {
+        await incrementUsage('routineOptimizationsUsed');
+      }
+
       trackEvent({
         eventName: 'routine_optimized',
         eventCategory: 'routine',
         eventProperties: { 
           productCount: routineProducts.length,
-          totalCost
+          totalCost,
+          tier: effectiveTier
         }
       });
 
@@ -395,20 +425,30 @@ export default function Routine() {
         {/* Routine Summary */}
         {routineProducts.length > 0 && (
           <Card className="p-6 mb-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h3 className="text-lg font-semibold mb-1">Routine Summary</h3>
                 <p className="text-sm text-muted-foreground">
                   {routineProducts.length} products • Total Cost: ${totalCost.toFixed(2)}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                {/* Usage counter for premium users */}
+                {effectiveTier === 'premium' && (
+                  <UsageCounter 
+                    used={usage.routineOptimizationsUsed} 
+                    limit={premiumLimits.routineOptimizations}
+                    label="Optimizations"
+                    feature="Routine Optimization"
+                  />
+                )}
                 <div className="flex items-center">
                   <Button
                     onClick={handleOptimizeRoutine}
                     disabled={optimizing}
                     className="bg-primary"
                   >
+                    {effectiveTier === 'free' && <Lock className="w-4 h-4 mr-2" />}
                     <Sparkles className="w-4 h-4 mr-2" />
                     {optimizing ? "Optimizing..." : "Optimize Routine"}
                   </Button>
@@ -417,7 +457,7 @@ export default function Routine() {
                       <Info className="w-4 h-4 ml-2 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs">
-                      <p>Our AI analyzes your routine for ingredient conflicts, redundancies, and cost-saving opportunities. Optimize after adding 2+ products for best results.</p>
+                      <p>Our AI analyzes your routine for ingredient conflicts, redundancies, and cost-saving opportunities. {effectiveTier === 'free' ? 'Upgrade to Premium for full access.' : 'Optimize after adding 2+ products for best results.'}</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -821,6 +861,19 @@ export default function Routine() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Paywall Modal */}
+        <PaywallModal 
+          open={showPaywall} 
+          onOpenChange={setShowPaywall}
+          feature={paywallFeature}
+          featureDescription={
+            paywallFeature === "Routine Optimization" 
+              ? "Get AI-powered recommendations to improve your routine and save money"
+              : "Unlock this premium feature"
+          }
+          showTrial={effectiveTier === 'free'}
+        />
       </div>
     </div>
     </TooltipProvider>

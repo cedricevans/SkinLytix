@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export type SubscriptionTier = 'free' | 'premium' | 'pro';
@@ -33,6 +33,7 @@ interface SubscriptionState {
   isLoading: boolean;
   trialEndsAt: Date | null;
   isInTrial: boolean;
+  subscriptionEnd: Date | null;
 }
 
 export function useSubscription() {
@@ -43,13 +44,10 @@ export function useSubscription() {
     isLoading: true,
     trialEndsAt: null,
     isInTrial: false,
+    subscriptionEnd: null,
   });
 
-  useEffect(() => {
-    loadSubscriptionStatus();
-  }, []);
-
-  const loadSubscriptionStatus = async () => {
+  const loadSubscriptionStatus = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -85,12 +83,32 @@ export function useSubscription() {
         isLoading: false,
         trialEndsAt,
         isInTrial,
+        subscriptionEnd: null,
       });
     } catch (error) {
       console.error('Error loading subscription:', error);
       setState(prev => ({ ...prev, isLoading: false }));
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadSubscriptionStatus();
+
+    // Also sync with Stripe on mount (after a brief delay to avoid race conditions)
+    const syncTimer = setTimeout(async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          await supabase.functions.invoke('check-subscription');
+          loadSubscriptionStatus();
+        }
+      } catch (error) {
+        console.error('Error syncing subscription:', error);
+      }
+    }, 1000);
+
+    return () => clearTimeout(syncTimer);
+  }, [loadSubscriptionStatus]);
 
   // Get effective tier (considers admin bypass and demo mode)
   const getEffectiveTier = (): SubscriptionTier => {
