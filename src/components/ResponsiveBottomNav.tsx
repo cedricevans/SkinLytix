@@ -1,4 +1,4 @@
-import { Home, Plus, Microscope, TrendingUp, Sparkles, MessageSquare } from "lucide-react";
+import { Home, Plus, Microscope, TrendingUp, Sparkles, MessageSquare, GitCompare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -31,16 +31,16 @@ export const ResponsiveBottomNav = ({ onAddToRoutine, showAddToRoutine = true, o
       show: true,
     },
     {
+      icon: GitCompare,
+      label: "Compare",
+      action: () => navigate('/compare'),
+      show: true,
+    },
+    {
       icon: TrendingUp,
       label: "Routine",
       action: () => navigate('/routine'),
       show: true,
-    },
-    {
-      icon: MessageSquare,
-      label: "Feedback",
-      action: () => navigate('/beta-feedback'),
-      show: true, // Always show feedback button
     },
     {
       icon: Sparkles,
