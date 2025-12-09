@@ -420,6 +420,53 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_dupes: {
+        Row: {
+          brand: string | null
+          id: string
+          image_url: string | null
+          price_estimate: string | null
+          product_name: string
+          reasons: string[] | null
+          saved_at: string | null
+          shared_ingredients: string[] | null
+          source_product_id: string | null
+          user_id: string
+        }
+        Insert: {
+          brand?: string | null
+          id?: string
+          image_url?: string | null
+          price_estimate?: string | null
+          product_name: string
+          reasons?: string[] | null
+          saved_at?: string | null
+          shared_ingredients?: string[] | null
+          source_product_id?: string | null
+          user_id: string
+        }
+        Update: {
+          brand?: string | null
+          id?: string
+          image_url?: string | null
+          price_estimate?: string | null
+          product_name?: string
+          reasons?: string[] | null
+          saved_at?: string | null
+          shared_ingredients?: string[] | null
+          source_product_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_dupes_source_product_id_fkey"
+            columns: ["source_product_id"]
+            isOneToOne: false
+            referencedRelation: "user_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_limits: {
         Row: {
           chat_messages_used: number | null
