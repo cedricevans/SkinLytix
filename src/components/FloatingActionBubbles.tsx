@@ -1,4 +1,4 @@
-import { Home, Plus, Microscope, TrendingUp } from "lucide-react";
+import { Home, Plus, Microscope, TrendingUp, GitCompare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -50,6 +50,14 @@ export const FloatingActionBubbles = ({
       position: "top-52 left-4",
       gradient: "from-[hsl(192,51%,48%)] to-[hsl(192,51%,56%)]",
       action: () => navigate('/upload'),
+      show: true,
+    },
+    {
+      icon: GitCompare,
+      label: "Compare Products",
+      position: "top-68 left-4",
+      gradient: "from-[hsl(192,51%,40%)] to-[hsl(197,75%,28%)]",
+      action: () => navigate('/compare'),
       show: true,
     },
   ];
