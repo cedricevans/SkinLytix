@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useTracking, trackEvent } from "@/hooks/useTracking";
 import { DemoModeToggle } from "@/components/DemoModeToggle";
 import { useSubscription } from "@/hooks/useSubscription";
+import { SubscriptionSection, TrialBanner } from "@/components/subscription";
 
 const skinTypes = [
   { value: "oily", label: "Oily", icon: Droplets, description: "Shiny, prone to breakouts" },
@@ -824,6 +825,9 @@ const Profile = () => {
                 )}
               </div>
             </Card>
+
+            {/* Subscription Section */}
+            <SubscriptionSection />
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
