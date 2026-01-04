@@ -330,6 +330,122 @@ export type Database = {
         }
         Relationships: []
       }
+      ingredient_corrections: {
+        Row: {
+          canonical_name: string | null
+          common_names: string[] | null
+          created_at: string | null
+          id: string
+          ingredient_name: string
+          last_validated_at: string | null
+          last_validated_by: string | null
+          updated_at: string | null
+          validation_count: number | null
+          verified_explanation: string | null
+          verified_molecular_weight: number | null
+          verified_pubchem_cid: string | null
+          verified_role: string | null
+          verified_safety_level: string | null
+        }
+        Insert: {
+          canonical_name?: string | null
+          common_names?: string[] | null
+          created_at?: string | null
+          id?: string
+          ingredient_name: string
+          last_validated_at?: string | null
+          last_validated_by?: string | null
+          updated_at?: string | null
+          validation_count?: number | null
+          verified_explanation?: string | null
+          verified_molecular_weight?: number | null
+          verified_pubchem_cid?: string | null
+          verified_role?: string | null
+          verified_safety_level?: string | null
+        }
+        Update: {
+          canonical_name?: string | null
+          common_names?: string[] | null
+          created_at?: string | null
+          id?: string
+          ingredient_name?: string
+          last_validated_at?: string | null
+          last_validated_by?: string | null
+          updated_at?: string | null
+          validation_count?: number | null
+          verified_explanation?: string | null
+          verified_molecular_weight?: number | null
+          verified_pubchem_cid?: string | null
+          verified_role?: string | null
+          verified_safety_level?: string | null
+        }
+        Relationships: []
+      }
+      ingredient_validations: {
+        Row: {
+          ai_explanation_accurate: boolean | null
+          ai_role_classification_correct: boolean | null
+          analysis_id: string | null
+          corrected_role: string | null
+          corrected_safety_level: string | null
+          correction_notes: string | null
+          created_at: string | null
+          id: string
+          ingredient_name: string
+          molecular_weight_correct: boolean | null
+          pubchem_cid_verified: string | null
+          pubchem_data_correct: boolean | null
+          reference_sources: Json | null
+          validation_status: string | null
+          validator_id: string
+          validator_institution: string | null
+        }
+        Insert: {
+          ai_explanation_accurate?: boolean | null
+          ai_role_classification_correct?: boolean | null
+          analysis_id?: string | null
+          corrected_role?: string | null
+          corrected_safety_level?: string | null
+          correction_notes?: string | null
+          created_at?: string | null
+          id?: string
+          ingredient_name: string
+          molecular_weight_correct?: boolean | null
+          pubchem_cid_verified?: string | null
+          pubchem_data_correct?: boolean | null
+          reference_sources?: Json | null
+          validation_status?: string | null
+          validator_id: string
+          validator_institution?: string | null
+        }
+        Update: {
+          ai_explanation_accurate?: boolean | null
+          ai_role_classification_correct?: boolean | null
+          analysis_id?: string | null
+          corrected_role?: string | null
+          corrected_safety_level?: string | null
+          correction_notes?: string | null
+          created_at?: string | null
+          id?: string
+          ingredient_name?: string
+          molecular_weight_correct?: boolean | null
+          pubchem_cid_verified?: string | null
+          pubchem_data_correct?: boolean | null
+          reference_sources?: Json | null
+          validation_status?: string | null
+          validator_id?: string
+          validator_institution?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingredient_validations_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "user_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_cache: {
         Row: {
           barcode: string

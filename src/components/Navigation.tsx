@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useReviewerAccess } from "@/hooks/useReviewerAccess";
 
 const navigationItems = [
   { label: "Home", href: "#home" },
@@ -16,6 +17,7 @@ const Navigation = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { hasAccess: hasReviewerAccess } = useReviewerAccess();
 
   const scrollToSection = (href: string, isRoute?: boolean) => {
     if (isRoute) {
@@ -67,6 +69,18 @@ const Navigation = () => {
                 {item.label}
               </button>
             ))}
+            {hasReviewerAccess && (
+              <button
+                onClick={() => {
+                  navigate('/dashboard/reviewer');
+                  setOpen(false);
+                }}
+                className="text-left px-4 py-3 text-lg font-subheading hover:bg-accent/10 rounded-lg transition-colors flex items-center gap-2 text-primary"
+              >
+                <ClipboardCheck className="w-5 h-5" />
+                Reviewer
+              </button>
+            )}
             <div className="mt-4 space-y-3 px-4">
               <Button
                 variant="outline"
@@ -101,6 +115,15 @@ const Navigation = () => {
           {item.label}
         </button>
       ))}
+      {hasReviewerAccess && (
+        <button
+          onClick={() => navigate('/dashboard/reviewer')}
+          className="text-sm font-subheading text-primary-foreground hover:text-primary-foreground/80 transition-colors flex items-center gap-1.5"
+        >
+          <ClipboardCheck className="w-4 h-4" />
+          Reviewer
+        </button>
+      )}
       <Button
         variant="ghost"
         size="sm"
