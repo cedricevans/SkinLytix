@@ -12,12 +12,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Camera, CalendarCheck, User, Sparkles, Target, BarChart3, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import inclusiveCommunity from "@/assets/audience/inclusive-community.png";
+import healthySkin from "@/assets/audience/healthy-skin.png";
+import applyingProduct from "@/assets/audience/applying-product.png";
+import realSkinAcne from "@/assets/audience/real-skin-acne-2.png";
+import friendsRoutine from "@/assets/audience/friends-routine.png";
+import skinTexture from "@/assets/audience/skin-texture-close.png";
 
 interface WalkthroughStep {
   title: string;
   description: string;
   details?: string[];
   icon: React.ElementType;
+  image?: string;
 }
 
 const steps: WalkthroughStep[] = [
@@ -30,6 +37,7 @@ const steps: WalkthroughStep[] = [
       "Make confident choices backed by dermatological research"
     ],
     icon: Sparkles,
+    image: inclusiveCommunity,
   },
   {
     title: "Understanding EpiQ Scores",
@@ -40,6 +48,7 @@ const steps: WalkthroughStep[] = [
       "71-100 (Green): Excellent match for your needs"
     ],
     icon: Target,
+    image: healthySkin,
   },
   {
     title: "Two Ways to Analyze",
@@ -50,6 +59,7 @@ const steps: WalkthroughStep[] = [
       "Works with face, body, and hair care products"
     ],
     icon: Camera,
+    image: applyingProduct,
   },
   {
     title: "Understanding Your Results",
@@ -60,6 +70,7 @@ const steps: WalkthroughStep[] = [
       "Learn about potential ingredient conflicts"
     ],
     icon: BarChart3,
+    image: realSkinAcne,
   },
   {
     title: "Build Your Routine",
@@ -70,6 +81,7 @@ const steps: WalkthroughStep[] = [
       "Get layering order recommendations"
     ],
     icon: CalendarCheck,
+    image: friendsRoutine,
   },
   {
     title: "Your Profile Evolves With You",
@@ -80,6 +92,7 @@ const steps: WalkthroughStep[] = [
       "Track how seasons affect your skin needs"
     ],
     icon: User,
+    image: skinTexture,
   },
 ];
 
@@ -130,9 +143,19 @@ export const AppWalkthrough = () => {
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleSkip()}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-              <Icon className="w-10 h-10 text-primary" />
+          {/* Step Image */}
+          {currentStepData.image && (
+            <div className="w-full h-32 rounded-xl overflow-hidden mb-4">
+              <img 
+                src={currentStepData.image} 
+                alt={currentStepData.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          <div className="flex items-center justify-center mb-2">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+              <Icon className="w-6 h-6 text-primary" />
             </div>
           </div>
           <DialogTitle className="text-center text-2xl">

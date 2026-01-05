@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import communityShopping from "@/assets/audience/community-shopping.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -101,13 +102,29 @@ const Auth = () => {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center py-12 px-4">
-      <Card className="w-full max-w-md p-6">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold mb-2">Welcome to SkinLytix</h1>
-          <p className="text-muted-foreground">
-            Your personal skincare intelligence engine
+      <div className="w-full max-w-4xl grid lg:grid-cols-2 gap-8 items-center">
+        {/* Left: Community Image (Desktop only) */}
+        <div className="hidden lg:block">
+          <div className="rounded-2xl overflow-hidden shadow-strong">
+            <img 
+              src={communityShopping} 
+              alt="Diverse women shopping for skincare products"
+              className="w-full h-auto object-cover"
+            />
+          </div>
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Join our growing community of skincare enthusiasts
           </p>
         </div>
+
+        {/* Right: Auth Form */}
+        <Card className="w-full p-6">
+          <div className="text-center mb-6">
+            <h1 className="text-3xl font-bold mb-2">Welcome to SkinLytix</h1>
+            <p className="text-muted-foreground">
+              Your personal skincare intelligence engine
+            </p>
+          </div>
 
         <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
           <AlertCircle className="h-4 w-4 text-amber-500" />
@@ -189,7 +206,8 @@ const Auth = () => {
             </form>
           </TabsContent>
         </Tabs>
-      </Card>
+        </Card>
+      </div>
     </main>
   );
 };
