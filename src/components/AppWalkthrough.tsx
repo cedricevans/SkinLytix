@@ -12,12 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Camera, CalendarCheck, User, Sparkles, Target, BarChart3, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import inclusiveCommunity from "@/assets/audience/inclusive-community.png";
-import healthySkin from "@/assets/audience/healthy-skin.png";
-import applyingProduct from "@/assets/audience/applying-product.png";
-import realSkinAcne from "@/assets/audience/real-skin-acne-2.png";
-import friendsRoutine from "@/assets/audience/friends-routine.png";
-import skinTexture from "@/assets/audience/skin-texture-close.png";
+import problemEndlessSearch from "@/assets/diverse/problem-endless-search.jpg";
+import stepScore from "@/assets/diverse/step-score.jpg";
+import stepScan from "@/assets/diverse/step-scan.jpg";
+import problemBreakouts from "@/assets/diverse/problem-breakouts.jpg";
+import problemTrialError from "@/assets/diverse/problem-trial-error.jpg";
+import stepOptimize from "@/assets/diverse/step-optimize.jpg";
 
 interface WalkthroughStep {
   title: string;
@@ -37,7 +37,7 @@ const steps: WalkthroughStep[] = [
       "Make confident choices backed by dermatological research"
     ],
     icon: Sparkles,
-    image: inclusiveCommunity,
+    image: problemEndlessSearch,
   },
   {
     title: "Understanding EpiQ Scores",
@@ -48,7 +48,7 @@ const steps: WalkthroughStep[] = [
       "71-100 (Green): Excellent match for your needs"
     ],
     icon: Target,
-    image: healthySkin,
+    image: stepScore,
   },
   {
     title: "Two Ways to Analyze",
@@ -59,7 +59,7 @@ const steps: WalkthroughStep[] = [
       "Works with face, body, and hair care products"
     ],
     icon: Camera,
-    image: applyingProduct,
+    image: stepScan,
   },
   {
     title: "Understanding Your Results",
@@ -70,7 +70,7 @@ const steps: WalkthroughStep[] = [
       "Learn about potential ingredient conflicts"
     ],
     icon: BarChart3,
-    image: realSkinAcne,
+    image: problemBreakouts,
   },
   {
     title: "Build Your Routine",
@@ -81,7 +81,7 @@ const steps: WalkthroughStep[] = [
       "Get layering order recommendations"
     ],
     icon: CalendarCheck,
-    image: friendsRoutine,
+    image: problemTrialError,
   },
   {
     title: "Your Profile Evolves With You",
@@ -92,7 +92,7 @@ const steps: WalkthroughStep[] = [
       "Track how seasons affect your skin needs"
     ],
     icon: User,
-    image: skinTexture,
+    image: stepOptimize,
   },
 ];
 

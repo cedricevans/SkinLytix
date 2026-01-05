@@ -1,29 +1,29 @@
-import coupleShopping from "@/assets/audience/couple-shopping.png";
-import communityShopping from "@/assets/audience/community-shopping.png";
-import labResearchers from "@/assets/audience/lab-researchers.png";
-import healthySkin from "@/assets/audience/healthy-skin.png";
+import stepScan from "@/assets/diverse/step-scan.jpg";
+import stepAnalyze from "@/assets/diverse/step-analyze.jpg";
+import stepScore from "@/assets/diverse/step-score.jpg";
+import stepOptimize from "@/assets/diverse/step-optimize.jpg";
 
 const steps = [
   {
-    image: coupleShopping,
+    image: stepScan,
     title: "Scan Your Products",
     description: "Upload a photo of any skincare product. Our OCR extracts ingredients automatically—or add manually if needed.",
     time: "30 seconds"
   },
   {
-    image: communityShopping,
+    image: stepAnalyze,
     title: "Community Database",
     description: "Check if someone already analyzed this product. If not, you're helping build our knowledge base for others.",
     time: "5 seconds"
   },
   {
-    image: labResearchers,
+    image: stepScore,
     title: "AI Analysis",
     description: "We query molecular data, validate against research, and analyze interactions using evidence-based logic.",
     time: "10 seconds"
   },
   {
-    image: healthySkin,
+    image: stepOptimize,
     title: "Get Your EpiQ Score",
     description: "Receive personalized routine recommendations, ingredient insights, and cost-effectiveness analysis.",
     time: "Instant"
