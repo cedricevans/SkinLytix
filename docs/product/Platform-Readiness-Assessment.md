@@ -31,7 +31,7 @@ SkinLytix is an AI-powered skincare ingredient analysis platform that enables us
 | **Overall Readiness** | 87% |
 | **Core Features Assessed** | 13 |
 | **Edge Functions Deployed** | 10 |
-| **Database Tables** | 16 |
+| **Database Tables** | 30 |
 | **UI Components** | 100+ |
 
 ### Platform Highlights
@@ -391,7 +391,9 @@ Landing page with hero, features, and conversion elements.
 | `query-open-beauty-facts` | Product database lookup | ✅ Active |
 | `query-pubchem` | Chemical data lookup | ✅ Active |
 
-### Database Tables (16 Tables)
+### Database Tables (30 Tables)
+
+*Note: Representative sample shown below. Full schema includes additional tables for caching, rate limiting, badges, waitlist, user roles, and ingredient articles.*
 
 | Table | Purpose | Records |
 |-------|---------|---------|
@@ -472,13 +474,18 @@ Landing page with hero, features, and conversion elements.
 |-----|--------|--------|----------|
 | Barcode/UPC Scanning | Mobile UX limitation | High | P2 |
 | PWA Support | No offline/install capability | Medium | P2 |
-| PDF Export | Users can't save reports | Medium | P2 |
+| PDF Generation | Text export exists; PDF formatting missing | Medium | P2 |
 | Email Notifications | No engagement emails | High | P2 |
 
 **Barcode Scanning Details:**
 - Current state: Planned but not implemented
 - Impact: Users must photograph ingredient lists instead of scanning barcodes
 - Solution: Integrate barcode scanner library + Open Beauty Facts API lookup
+
+**PDF Generation Details:**
+- Current state: Text export via `ExportAnalysisButton.tsx` is functional
+- Impact: Users can export to plain text but cannot generate formatted PDF reports
+- Solution: Integrate PDF library (e.g., jsPDF, html2pdf) for styled report generation
 
 ---
 
