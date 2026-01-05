@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Award, Users, FlaskConical, Shield, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import labResearchers from '@/assets/audience/lab-researchers.png';
+import stepAnalyze from '@/assets/diverse/step-analyze.jpg';
 
 interface LiveMetrics {
   totalAnalyses: number;
@@ -174,8 +174,8 @@ const LiveTrustSignals = () => {
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
             <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden flex-shrink-0">
               <img 
-                src={labResearchers} 
-                alt="Cosmetic science researchers validating our data"
+                src={stepAnalyze} 
+                alt="Diverse cosmetic science students reviewing skincare data"
                 className="w-full h-full object-cover"
               />
             </div>
