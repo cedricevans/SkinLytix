@@ -8,6 +8,20 @@ This folder contains all business and technical documentation for the SkinLytix 
 
 ## 📚 Document Index
 
+### Product Documents
+
+Located in `/docs/product/`:
+
+1. **[Platform Readiness Assessment](./product/Platform-Readiness-Assessment.md)**
+   - Comprehensive feature inventory (13 features assessed)
+   - Readiness percentages by feature (87% overall)
+   - Gap analysis with priorities
+   - Backend infrastructure overview
+   - Platform strengths and recommended next steps
+   - **Audience:** Product managers, founders, investors
+
+---
+
 ### Business Documents
 
 Located in `/docs/business/`:
@@ -77,6 +91,7 @@ Located in `/docs/technical/`:
 
 | Document | Pages | Last Updated | Status |
 |----------|-------|--------------|--------|
+| **Platform Readiness** | 25+ | Jan 5, 2026 | Active |
 | **PRD** | 45+ | Oct 6, 2025 | Active |
 | **MVP** | 35+ | Oct 6, 2025 | Active |
 | **Scaling Strategy** | 30+ | Oct 6, 2025 | Active |
