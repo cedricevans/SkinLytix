@@ -13,6 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import labResearchers from '@/assets/audience/lab-researchers.png';
 
 const FREE_FEATURES = [
   'Unlimited product analyses',
@@ -317,18 +318,28 @@ const Pricing = () => {
       {/* Academic Partnership Banner */}
       <section className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
-          <Card className="bg-gradient-to-br from-primary/10 via-accent/5 to-transparent border-primary/20">
-            <CardContent className="py-8 text-center">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Star className="h-5 w-5 text-primary" />
-                <span className="font-heading font-bold text-lg">Human + AI Validation</span>
-                <Star className="h-5 w-5 text-primary" />
+          <Card className="bg-gradient-to-br from-primary/10 via-accent/5 to-transparent border-primary/20 overflow-hidden">
+            <CardContent className="py-8">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-xl overflow-hidden flex-shrink-0">
+                  <img 
+                    src={labResearchers} 
+                    alt="Cosmetic science researchers"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="text-center md:text-left flex-1">
+                  <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
+                    <Star className="h-5 w-5 text-primary" />
+                    <span className="font-heading font-bold text-lg">Human + AI Validation</span>
+                  </div>
+                  <p className="text-muted-foreground">
+                    Every EpiQ Score is calibrated by Cosmetic Science students from our founding academic partner, 
+                    <span className="font-semibold text-foreground"> Spelman College</span>. 
+                    Real expertise backing every recommendation.
+                  </p>
+                </div>
               </div>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Every EpiQ Score is calibrated by Cosmetic Science students from our founding academic partner, 
-                <span className="font-semibold text-foreground"> Spelman College</span>. 
-                Real expertise backing every recommendation.
-              </p>
             </CardContent>
           </Card>
         </div>
