@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle2, Sparkles, Home, ScanLine, Plus, Info, HelpCircle, AlertTriangle, Download } from "lucide-react";
-import { IngredientCard } from "@/components/IngredientCard";
 import PostAnalysisFeedback from "@/components/PostAnalysisFeedback";
 import { PostAnalysisFeedbackCard } from "@/components/PostAnalysisFeedbackCard";
 import { FrictionFeedbackBanner } from "@/components/FrictionFeedbackBanner";
@@ -28,6 +27,10 @@ import { DemoModeToggle } from "@/components/DemoModeToggle";
 import { ExportAnalysisButton } from "@/components/ExportAnalysisButton";
 import { ExpertReviewBadge } from "@/components/ExpertReviewBadge";
 import ChatPromoCard from "@/components/ChatPromoCard";
+import AppShell from "@/components/AppShell";
+import PageHeader from "@/components/PageHeader";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AnalysisData {
   id: string;
@@ -97,16 +100,29 @@ const Analysis = () => {
   useTracking('analysis');
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshAttempts, setRefreshAttempts] = useState(0);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [addingToRoutine, setAddingToRoutine] = useState(false);
+  const [showAllSafe, setShowAllSafe] = useState(false);
+  const [showAllConcerns, setShowAllConcerns] = useState(false);
+  const [showAllNeeds, setShowAllNeeds] = useState(false);
 
-  const fetchAnalysis = async () => {
+  const fetchAnalysis = async (options?: { silent?: boolean }) => {
     if (!id) return;
+    const silent = options?.silent;
 
+    if (!silent) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate('/auth');
+        if (!silent) {
+          navigate('/auth');
+        }
         return;
       }
 
@@ -119,12 +135,14 @@ const Analysis = () => {
 
       if (error) {
         console.error('Error fetching analysis:', error);
-        toast({
-          title: "Error loading analysis",
-          description: "Could not load the analysis data.",
-          variant: "destructive",
-        });
-        navigate('/');
+        if (!silent) {
+          toast({
+            title: "Error loading analysis",
+            description: "Could not load the analysis data.",
+            variant: "destructive",
+          });
+          navigate('/');
+        }
         return;
       }
 
@@ -132,7 +150,11 @@ const Analysis = () => {
     } catch (error) {
       console.error('Unexpected error:', error);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      } else {
+        setRefreshing(false);
+      }
     }
   };
 
@@ -211,6 +233,28 @@ const Analysis = () => {
     fetchAnalysis();
   }, [id]);
 
+  useEffect(() => {
+    setRefreshAttempts(0);
+  }, [id]);
+
+  const maxRefreshAttempts = 12;
+  const refreshIntervalMs = 10000;
+  const isProcessingDetails =
+    !!analysis &&
+    !analysis.recommendations_json?.ai_explanation &&
+    refreshAttempts < maxRefreshAttempts;
+  const refreshProgress = Math.min(100, Math.round((refreshAttempts / maxRefreshAttempts) * 100));
+
+  useEffect(() => {
+    if (!analysis || !isProcessingDetails) return;
+    const timeoutId = window.setTimeout(() => {
+      setRefreshAttempts((prev) => prev + 1);
+      fetchAnalysis({ silent: true });
+    }, refreshIntervalMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [analysis, isProcessingDetails, refreshAttempts, id]);
+
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted">
@@ -239,6 +283,14 @@ const Analysis = () => {
     return "Needs Attention";
   };
 
+  const getIngredientName = (ingredient: any) => {
+    return typeof ingredient === "string" ? ingredient : ingredient.name;
+  };
+
+  const getIngredientId = (name: string) => {
+    return `ingredient-${name.replace(/\s+/g, '-')}`;
+  };
+
   return (
     <TooltipProvider>
       {analysis?.recommendations_json?.ai_explanation?.professional_referral?.needed && (
@@ -247,11 +299,56 @@ const Analysis = () => {
           suggestedProfessionalType={analysis.recommendations_json.ai_explanation.professional_referral.suggested_professional_type}
         />
       )}
-      <main className="min-h-screen bg-gradient-to-b from-background to-muted py-6 md:py-12 px-4">
+      <AppShell
+        className="bg-gradient-to-b from-background to-muted"
+        contentClassName="px-4 py-6 md:py-10"
+        header={
+          <PageHeader>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Button variant="ghost" onClick={() => navigate('/')}>
+                <Home className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+              <ExportAnalysisButton
+                analysisId={analysis.id}
+                productName={analysis.product_name}
+                analysisData={analysis}
+              />
+            </div>
+          </PageHeader>
+        }
+      >
       <div className="container max-w-4xl mx-auto">
+        <div className="space-y-8 md:space-y-10">
         
+        <section className="space-y-6 md:space-y-8">
+          <div className="flex items-center justify-between">
+            <p className="text-xs md:text-sm font-subheading uppercase tracking-[0.3em] text-muted-foreground">
+              Overview
+            </p>
+          </div>
+
+        {isProcessingDetails && (
+          <Card className="p-4 md:p-6 border-primary/20 bg-primary/5">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-primary">Finishing your analysis…</p>
+                <p className="text-sm text-muted-foreground">
+                  Some AI insights can take up to 2 minutes to appear. This page updates automatically.
+                </p>
+              </div>
+              <div className="w-full md:w-56">
+                <Progress value={refreshProgress} />
+                <p className="text-xs text-muted-foreground mt-2 text-right">
+                  {refreshing ? "Refreshing..." : `Updating (${refreshAttempts}/${maxRefreshAttempts})`}
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Dashboard Header */}
-        <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 rounded-xl p-4 md:p-6 mb-6 md:mb-8 animate-fade-in shadow-soft border border-border/50">
+        <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 rounded-xl p-4 md:p-6 animate-fade-in shadow-soft border border-border/50">
           <div className="flex flex-col gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -265,6 +362,14 @@ const Analysis = () => {
                   <span className="px-2 py-1 bg-primary/20 rounded-md capitalize font-medium">
                     {analysis.category}
                   </span>
+                )}
+                {productMetadata?.product_type_label && (
+                  <>
+                    <span>•</span>
+                    <span className="px-2 py-1 bg-secondary/60 rounded-md capitalize font-medium">
+                      {productMetadata.product_type_label}
+                    </span>
+                  </>
                 )}
                 <span>•</span>
                 <span>Analyzed {new Date(analysis.analyzed_at).toLocaleDateString()}</span>
@@ -294,18 +399,54 @@ const Analysis = () => {
             </div>
           </div>
         </div>
-        
-        <div className="hidden md:flex items-center justify-between mb-6 md:mb-8">
-          <Button variant="ghost" onClick={() => navigate('/')}>
-            <Home className="w-4 h-4 mr-2" />
-            Back to Home
-          </Button>
-          <ExportAnalysisButton
-            analysisId={analysis.id}
-            productName={analysis.product_name}
-            analysisData={analysis}
-          />
-        </div>
+
+        <Card className="p-4 md:p-6">
+          <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <h2 className="text-xl font-semibold">Quick Takeaways</h2>
+            <Badge variant="secondary">{getScoreLabel(analysis.epiq_score)}</Badge>
+          </div>
+          <div className="space-y-3 text-sm text-muted-foreground">
+            <p>
+              <span className="font-semibold text-foreground">EpiQ Score:</span> {analysis.epiq_score}/100 — {analysis.recommendations_json.summary}
+            </p>
+            <p>
+              <span className="font-semibold text-foreground">Ingredient profile:</span>{" "}
+              {analysis.recommendations_json.safe_ingredients?.length || 0} safe,{" "}
+              {analysis.recommendations_json.problematic_ingredients?.length || 0} concerns,{" "}
+              {analysis.recommendations_json.concern_ingredients?.length || 0} unverified.
+            </p>
+            {analysis.recommendations_json.warnings?.length ? (
+              <p>
+                <span className="font-semibold text-foreground">Personalized warnings:</span>{" "}
+                {analysis.recommendations_json.warnings.length} flag{analysis.recommendations_json.warnings.length === 1 ? "" : "s"} to review.
+              </p>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap gap-2 mt-5">
+            <Button
+              variant="cta"
+              onClick={handleAddToRoutine}
+              disabled={addingToRoutine}
+              className="touch-target"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {addingToRoutine ? "Adding..." : "Add to Routine"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsChatOpen(true);
+                trackEvent({
+                  eventName: 'chat_opened',
+                  eventCategory: 'chat',
+                  eventProperties: { analysisId: analysis.id, source: 'quick_takeaways' }
+                });
+              }}
+            >
+              Ask SkinLytixGPT
+            </Button>
+          </div>
+        </Card>
 
         {/* Mobile-only Primary CTA */}
         <div className="md:hidden mb-4">
@@ -322,7 +463,7 @@ const Analysis = () => {
         </div>
 
         {/* Routine Optimizer Info Banner */}
-        <Card className="p-4 md:p-6 mb-6 md:mb-8 bg-gradient-to-r from-cta/10 via-accent/10 to-primary/10 border-cta/20">
+        <Card className="p-4 md:p-6 bg-gradient-to-r from-cta/10 via-accent/10 to-primary/10 border-cta/20">
           <div className="flex-1">
             <h3 className="font-semibold text-lg mb-2">💰 Unlock Cost Savings with Routine Optimizer</h3>
             <p className="text-sm text-muted-foreground mb-3">
@@ -339,31 +480,7 @@ const Analysis = () => {
           </div>
         </Card>
 
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">{analysis.product_name}</h1>
-          <div className="flex flex-wrap gap-2 mb-2">
-            {productMetadata?.product_type_label && (
-              <Badge variant="default" className="text-base">
-                {productMetadata.product_type_label}
-              </Badge>
-            )}
-            {(analysis.brand || productMetadata?.brand) && (
-              <Badge variant="secondary">
-                {analysis.brand || productMetadata.brand}
-              </Badge>
-            )}
-            {(analysis.category || productMetadata?.category) && (
-              <Badge variant="outline">
-                {analysis.category || productMetadata.category}
-              </Badge>
-            )}
-          </div>
-          <p className="text-muted-foreground">
-            Analyzed on {new Date(analysis.analyzed_at).toLocaleDateString()}
-          </p>
-        </div>
-
-        <Card className="p-4 md:p-6 lg:p-8 mb-6 md:mb-8 text-center bg-gradient-to-br from-primary/5 to-accent/5">
+        <Card className="p-4 md:p-6 lg:p-8 text-center bg-gradient-to-br from-primary/5 to-accent/5">
           <div className="flex items-center justify-center gap-2 mb-6">
             <h2 className="text-2xl font-semibold">EpiQ Score</h2>
             <Tooltip>
@@ -391,7 +508,7 @@ const Analysis = () => {
         )}
 
         {analysis.recommendations_json.personalized && (
-          <Card className="p-4 md:p-6 mb-6 md:mb-8 bg-primary/5 border-primary/20">
+          <Card className="p-4 md:p-6 bg-primary/5 border-primary/20">
             <div className="flex items-center gap-3">
               <Sparkles className="w-6 h-6 text-primary" />
               <div className="flex-1">
@@ -413,24 +530,39 @@ const Analysis = () => {
             </div>
           </Card>
         )}
+        </section>
 
-        {/* AI Explanation Section - SkinLytix GPT */}
-        {analysis.recommendations_json.ai_explanation && (
-          <AIExplanationAccordion aiExplanation={analysis.recommendations_json.ai_explanation} />
-        )}
+        <section className="space-y-6 md:space-y-8">
+          <div className="flex items-center justify-between">
+            <p className="text-xs md:text-sm font-subheading uppercase tracking-[0.3em] text-muted-foreground">
+              AI Insights
+            </p>
+          </div>
 
-        {/* Chat Promo Card */}
-        <ChatPromoCard 
-          onOpenChat={() => {
-            setIsChatOpen(true);
-            trackEvent({
-              eventName: 'chat_opened',
-              eventCategory: 'chat',
-              eventProperties: { analysisId: analysis.id, source: 'promo_card' }
-            });
-          }}
-          className="mb-6 md:mb-8"
-        />
+          {/* AI Explanation Section - SkinLytix GPT */}
+          {analysis.recommendations_json.ai_explanation && (
+            <AIExplanationAccordion aiExplanation={analysis.recommendations_json.ai_explanation} />
+          )}
+
+          {/* Chat Promo Card */}
+          <ChatPromoCard 
+            onOpenChat={() => {
+              setIsChatOpen(true);
+              trackEvent({
+                eventName: 'chat_opened',
+                eventCategory: 'chat',
+                eventProperties: { analysisId: analysis.id, source: 'promo_card' }
+              });
+            }}
+          />
+        </section>
+
+        <section className="space-y-6 md:space-y-8">
+          <div className="flex items-center justify-between">
+            <p className="text-xs md:text-sm font-subheading uppercase tracking-[0.3em] text-muted-foreground">
+              Ingredient Breakdown
+            </p>
+          </div>
 
         {/* Ingredient Risk Heatmap */}
         {(() => {
@@ -468,49 +600,6 @@ const Analysis = () => {
           ) : null;
         })()}
 
-        {analysis.recommendations_json.problematic_ingredients &&
-         analysis.recommendations_json.problematic_ingredients.length > 0 && (
-           <Card className="p-4 md:p-6 mb-6 md:mb-8 border-destructive/50 bg-destructive/5">
-             <div className="flex items-center gap-3 mb-4">
-               <AlertTriangle className="w-8 h-8 text-destructive animate-pulse" />
-               <div className="flex-1">
-                 <div className="flex items-center gap-2">
-                   <h2 className="text-2xl font-bold text-destructive">🚨 Ingredients to Avoid</h2>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-sm">
-                      <p className="font-semibold mb-1">Based on your skin profile</p>
-                      <p>These ingredients are recognized in scientific databases but may not be suitable for your specific skin type or concerns.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  These ingredients may conflict with your {analysis.recommendations_json.product_metadata?.product_type || 'skin'} profile
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {analysis.recommendations_json.problematic_ingredients.map((item, index) => (
-                <div key={index} id={`ingredient-${item.name.replace(/\s+/g, '-')}`}>
-                  <IngredientCard
-                    name={item.name}
-                    category="problematic"
-                    details={item.reason}
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 p-3 bg-destructive/10 rounded-lg border border-destructive/30">
-              <p className="text-sm">
-                <strong>⚠️ Consider avoiding this product</strong> if you have sensitive skin or active concerns. 
-                These ingredients are known to potentially aggravate your specific condition.
-              </p>
-            </div>
-          </Card>
-        )}
-
          {analysis.recommendations_json.warnings && analysis.recommendations_json.warnings.length > 0 && (
           <Card className="p-4 md:p-6 mb-6 md:mb-8 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
             <div className="flex items-center gap-3 mb-4">
@@ -530,111 +619,212 @@ const Analysis = () => {
           </Card>
         )}
 
-         <Card className="p-4 md:p-6 mb-6 md:mb-8">
-           <div className="flex items-center gap-3 mb-4">
-             <CheckCircle2 className="w-8 h-8 text-green-500 animate-pulse" />
-             <div className="flex-1">
-               <div className="flex items-center gap-2">
-                 <h2 className="text-2xl font-bold">✅ Safe Ingredients</h2>
+        <Card className="p-4 md:p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <ScanLine className="w-8 h-8 text-primary" />
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold">Ingredient Library</h2>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Info className="w-4 h-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">
-                    <p>These ingredients are well-documented in scientific databases and are suitable for your skin profile. 
-                    Ingredients with a ✨ star specifically target your concerns.</p>
+                  <TooltipContent className="max-w-sm">
+                    <p>Browse ingredients by category. Tap a row to reveal details.</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
               <p className="text-sm text-muted-foreground">
-                {analysis.recommendations_json.beneficial_ingredients?.length > 0 
-                  ? `${analysis.recommendations_json.beneficial_ingredients.length} beneficial for your profile`
-                  : 'Recognized and suitable for your skin'
-                }
+                Switch tabs to keep the list short and focused while still seeing every ingredient.
               </p>
             </div>
           </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {analysis.recommendations_json.safe_ingredients.length > 0 ? (
-                <>
-                {analysis.recommendations_json.beneficial_ingredients?.map((item: any, index: number) => (
-                  <IngredientCard
-                    key={`beneficial-${index}`}
-                    name={item.name}
-                    category="beneficial"
-                    details={item.benefit}
-                    emoji="✨"
-                    role={item.role}
-                    molecular_weight={item.molecular_weight}
-                    safety_profile={item.safety_profile}
-                  />
-                ))}
-                {analysis.recommendations_json.safe_ingredients
-                  .filter((ing: any) => !analysis.recommendations_json.beneficial_ingredients?.some((b: any) => b.name === (typeof ing === 'string' ? ing : ing.name)))
-                  .map((ingredient: any, index: number) => (
-                    <IngredientCard
-                      key={`safe-${index}`}
-                      name={typeof ingredient === 'string' ? ingredient : ingredient.name}
-                      category="safe"
-                      details={typeof ingredient === 'object' ? ingredient.explanation : undefined}
-                      role={typeof ingredient === 'object' ? ingredient.role : undefined}
-                      molecular_weight={typeof ingredient === 'object' ? ingredient.molecular_weight : undefined}
-                      safety_profile={typeof ingredient === 'object' ? ingredient.safety_profile : undefined}
-                    />
-                  ))
-                }
-              </>
-            ) : (
-              <p className="text-muted-foreground">No safe ingredients identified</p>
-            )}
-          </div>
-        </Card>
 
-        {analysis.recommendations_json.concern_ingredients.length > 0 && (
-           <Card className="p-4 md:p-6 mb-6 md:mb-8 border-amber-200 dark:border-amber-800">
-             <div className="flex items-center gap-3 mb-4">
-               <HelpCircle className="w-8 h-8 text-amber-500 animate-pulse" />
-               <div className="flex-1">
-                 <div className="flex items-center gap-2">
-                   <h2 className="text-2xl font-bold">🔍 Unverified Ingredients</h2>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-sm">
-                      <p className="font-semibold mb-1">Not found in our scientific databases</p>
-                      <p className="mb-2">These ingredients don't appear in PubChem or Open Beauty Facts, but this doesn't mean they're unsafe or ineffective.</p>
-                      <p className="text-xs">Common reasons: proprietary names, trade secrets, new ingredients, or botanical extracts not yet catalogued.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Not in our database (PubChem, Open Beauty Facts) - may still be safe
+          <Tabs defaultValue="safe" className="w-full">
+            <TabsList className="w-full flex flex-wrap">
+              <TabsTrigger value="safe" className="flex-1 text-sm">
+                Safe ({analysis.recommendations_json.safe_ingredients?.length || 0})
+              </TabsTrigger>
+              <TabsTrigger value="concerns" className="flex-1 text-sm">
+                Concerns ({analysis.recommendations_json.problematic_ingredients?.length || 0})
+              </TabsTrigger>
+              <TabsTrigger value="needs" className="flex-1 text-sm">
+                Needs More Data ({analysis.recommendations_json.concern_ingredients?.length || 0})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="safe" className="mt-4 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                {analysis.recommendations_json.beneficial_ingredients?.length
+                  ? `${analysis.recommendations_json.beneficial_ingredients.length} targeted for your profile`
+                  : "Recognized and suitable for your skin"}
+              </p>
+              <div className="space-y-2">
+                {(() => {
+                  const beneficial = analysis.recommendations_json.beneficial_ingredients || [];
+                  const safe = analysis.recommendations_json.safe_ingredients || [];
+                  const safeItems = [
+                    ...beneficial.map((item: any) => ({
+                      name: item.name,
+                      label: "Targeted",
+                      details: item.benefit,
+                      role: item.role,
+                      risk: item.risk_score,
+                    })),
+                    ...safe
+                      .filter((ing: any) => !beneficial.some((b: any) => b.name === getIngredientName(ing)))
+                      .map((ingredient: any) => ({
+                        name: getIngredientName(ingredient),
+                        label: "Safe",
+                        details: typeof ingredient === "object" ? ingredient.explanation : undefined,
+                        role: typeof ingredient === "object" ? ingredient.role : undefined,
+                        risk: typeof ingredient === "object" ? ingredient.risk_score : undefined,
+                      })),
+                  ];
+
+                  const limit = 8;
+                  const visible = showAllSafe ? safeItems : safeItems.slice(0, limit);
+
+                  return (
+                    <>
+                      {visible.map((item, index) => (
+                        <details key={`${item.name}-${index}`} id={getIngredientId(item.name)} className="rounded-lg border border-border/60 bg-background/50 px-3 py-2">
+                          <summary className="cursor-pointer list-none flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <Badge className={item.label === "Targeted" ? "bg-success/30 text-success-foreground border border-success/40" : "bg-secondary/80"}>{item.label}</Badge>
+                              <span className="font-medium">{item.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              {item.role && <span className="hidden sm:inline">Role: {item.role}</span>}
+                              {item.risk !== undefined && item.risk !== null && <span>Risk {item.risk}</span>}
+                            </div>
+                          </summary>
+                          {item.details && (
+                            <p className="mt-2 text-sm text-muted-foreground">{item.details}</p>
+                          )}
+                        </details>
+                      ))}
+                      {safeItems.length > limit && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowAllSafe((prev) => !prev)}
+                          className="w-full"
+                        >
+                          {showAllSafe ? "Show fewer" : `Show all ${safeItems.length}`}
+                        </Button>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="concerns" className="mt-4 space-y-3">
+              <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/5 text-sm">
+                <strong>⚠️ Consider avoiding this product</strong> if you have sensitive skin or active concerns.
+              </div>
+              <div className="space-y-2">
+                {(() => {
+                  const items = analysis.recommendations_json.problematic_ingredients || [];
+                  const limit = 6;
+                  const visible = showAllConcerns ? items : items.slice(0, limit);
+
+                  return (
+                    <>
+                      {visible.map((item, index) => (
+                        <details key={`${item.name}-${index}`} id={getIngredientId(item.name)} className="rounded-lg border border-border/60 bg-background/50 px-3 py-2">
+                          <summary className="cursor-pointer list-none flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="destructive">Concern</Badge>
+                              <span className="font-medium">{item.name}</span>
+                            </div>
+                            {item.risk_score !== undefined && item.risk_score !== null && (
+                              <span className="text-xs text-muted-foreground">Risk {item.risk_score}</span>
+                            )}
+                          </summary>
+                          <p className="mt-2 text-sm text-muted-foreground">{item.reason}</p>
+                        </details>
+                      ))}
+                      {items.length > limit && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowAllConcerns((prev) => !prev)}
+                          className="w-full"
+                        >
+                          {showAllConcerns ? "Show fewer" : `Show all ${items.length}`}
+                        </Button>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="needs" className="mt-4 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Not found in our databases (PubChem, Open Beauty Facts) — may still be safe.
+              </p>
+              <div className="space-y-2">
+                {(() => {
+                  const items = analysis.recommendations_json.concern_ingredients || [];
+                  const limit = 6;
+                  const visible = showAllNeeds ? items : items.slice(0, limit);
+
+                  return (
+                    <>
+                      {visible.map((ingredient: any, index: number) => {
+                        const name = getIngredientName(ingredient);
+                        const details = typeof ingredient === "object"
+                          ? ingredient.explanation
+                          : "Not found in PubChem or Open Beauty Facts databases. May be a proprietary blend or trade name.";
+                        const role = typeof ingredient === "object" ? ingredient.role : undefined;
+                        return (
+                          <details key={`${name}-${index}`} id={getIngredientId(name)} className="rounded-lg border border-border/60 bg-background/50 px-3 py-2">
+                            <summary className="cursor-pointer list-none flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="border-amber-300 text-amber-700">Needs Data</Badge>
+                                <span className="font-medium">{name}</span>
+                              </div>
+                              {role && <span className="text-xs text-muted-foreground">Role: {role}</span>}
+                            </summary>
+                            <p className="mt-2 text-sm text-muted-foreground">{details}</p>
+                          </details>
+                        );
+                      })}
+                      {items.length > limit && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowAllNeeds((prev) => !prev)}
+                          className="w-full"
+                        >
+                          {showAllNeeds ? "Show fewer" : `Show all ${items.length}`}
+                        </Button>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+              <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-950 rounded-lg border border-amber-200 dark:border-amber-800">
+                <p className="text-sm text-amber-900 dark:text-amber-100">
+                  💡 <strong>What to do:</strong> These ingredients may be perfectly safe. Consider looking them up individually or asking a dermatologist if you have concerns.
                 </p>
               </div>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {analysis.recommendations_json.concern_ingredients.map((ingredient: any, index: number) => (
-                <IngredientCard
-                  key={index}
-                  name={typeof ingredient === 'string' ? ingredient : ingredient.name}
-                  category="unverified"
-                  details={typeof ingredient === 'object' ? ingredient.explanation : "Not found in PubChem or Open Beauty Facts databases. May be a proprietary blend or trade name."}
-                  role={typeof ingredient === 'object' ? ingredient.role : undefined}
-                  molecular_weight={typeof ingredient === 'object' ? ingredient.molecular_weight : undefined}
-                  safety_profile={typeof ingredient === 'object' ? ingredient.safety_profile : undefined}
-                />
-              ))}
-            </div>
-            <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950 rounded-lg border border-amber-200 dark:border-amber-800">
-              <p className="text-sm text-amber-900 dark:text-amber-100">
-                💡 <strong>What to do:</strong> These ingredients may be perfectly safe. Consider looking them up individually or asking a dermatologist if you have concerns.
-              </p>
-            </div>
-          </Card>
-        )}
+            </TabsContent>
+          </Tabs>
+        </Card>
+        </section>
 
-         <Card className="p-4 md:p-6 mb-24 md:mb-0">
+        <section className="space-y-6 md:space-y-8">
+          <div className="flex items-center justify-between">
+            <p className="text-xs md:text-sm font-subheading uppercase tracking-[0.3em] text-muted-foreground">
+              Routine Guidance
+            </p>
+          </div>
+
+         <Card className="p-4 md:p-6">
            <div className="flex items-center gap-3 mb-4">
              <Sparkles className="w-8 h-8 text-amber-600 dark:text-amber-400 animate-pulse" />
              <div className="flex-1">
@@ -664,22 +854,33 @@ const Analysis = () => {
             </p>
           )}
         </Card>
+        </section>
 
-        {/* Friction Feedback Banner - Show for low EpiQ scores */}
-        {analysis.epiq_score < 50 && (
-          <div className="mb-6">
-            <FrictionFeedbackBanner trigger="low_score" context={`EpiQ Score: ${analysis.epiq_score}`} />
+        <section className="space-y-6 md:space-y-8">
+          <div className="flex items-center justify-between">
+            <p className="text-xs md:text-sm font-subheading uppercase tracking-[0.3em] text-muted-foreground">
+              Feedback
+            </p>
           </div>
-        )}
 
-        {/* Post-Analysis Feedback */}
-        <div className="mb-6">
-          <PostAnalysisFeedback analysisId={analysis.id} />
-        </div>
+          {/* Friction Feedback Banner - Show for low EpiQ scores */}
+          {analysis.epiq_score < 50 && (
+            <div>
+              <FrictionFeedbackBanner trigger="low_score" context={`EpiQ Score: ${analysis.epiq_score}`} />
+            </div>
+          )}
 
-        {/* Post-Analysis Feedback Card */}
-        <div className="mb-24 md:mb-8">
-          <PostAnalysisFeedbackCard />
+          {/* Post-Analysis Feedback */}
+          <div>
+            <PostAnalysisFeedback analysisId={analysis.id} />
+          </div>
+
+          {/* Post-Analysis Feedback Card */}
+          <div>
+            <PostAnalysisFeedbackCard />
+          </div>
+        </section>
+
         </div>
 
         {/* Floating Action Bubbles - Desktop only */}
@@ -715,7 +916,7 @@ const Analysis = () => {
         {/* Demo Mode Toggle - Admin Only */}
         <DemoModeToggle />
       </div>
-    </main>
+    </AppShell>
     </TooltipProvider>
   );
 };

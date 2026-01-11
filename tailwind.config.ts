@@ -63,8 +63,8 @@ export default {
       },
       fontFamily: {
         heading: ['"Montserrat"', 'sans-serif'],
-        subheading: ['"Lora"', 'serif'],
-        body: ['"Playfair Display"', 'serif'],
+        subheading: ['"Source Sans 3"', 'sans-serif'],
+        body: ['"Source Sans 3"', 'sans-serif'],
         cta: ['"Poppins"', 'sans-serif'],
       },
       backgroundImage: {

@@ -13,6 +13,8 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import { useTracking, trackEvent } from "@/hooks/useTracking";
 import OCRLoadingTips from "@/components/OCRLoadingTips";
 import { FrictionFeedbackBanner } from "@/components/FrictionFeedbackBanner";
+import AppShell from "@/components/AppShell";
+import PageHeader from "@/components/PageHeader";
 
 // Helper: Preprocess image for better OCR accuracy
 const preprocessImage = (imageDataUrl: string): Promise<string> => {
@@ -280,37 +282,46 @@ const Upload = () => {
 
   return (
     <TooltipProvider>
-      <main className="min-h-screen bg-gradient-to-b from-background to-muted py-12 px-4 overflow-x-hidden">
-      <div className="container max-w-3xl mx-auto w-full">
-        {/* Friction Feedback Banner */}
-        {showFrictionBanner && (
-          <div className="mb-6">
-            <FrictionFeedbackBanner trigger="error" context="Analysis failed" />
-          </div>
-        )}
-        {/* Navigation Header */}
-        <div className="flex justify-between items-center mb-8">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/')}
-            className="gap-2"
-          >
-            <Home className="w-4 h-4" />
-            Home
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate('/profile')}
-            className="gap-2"
-          >
-            <User className="w-4 h-4" />
-            Profile
-          </Button>
-        </div>
-        
-        <h1 className="text-4xl font-bold text-center mb-8">Upload Product</h1>
-        
-        <Card className="p-6 space-y-6">
+      <AppShell
+        className="bg-gradient-to-b from-background to-muted"
+        header={
+          <PageHeader>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/')}
+                  className="gap-2"
+                >
+                  <Home className="w-4 h-4" />
+                  Home
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/profile')}
+                  className="gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  Profile
+                </Button>
+              </div>
+            </div>
+            <div className="mt-4">
+              <h1 className="text-3xl md:text-4xl font-bold">Upload Product</h1>
+            </div>
+          </PageHeader>
+        }
+        contentClassName="px-4 py-10 overflow-x-hidden"
+      >
+        <div className="container max-w-3xl mx-auto w-full">
+          {/* Friction Feedback Banner */}
+          {showFrictionBanner && (
+            <div className="mb-6">
+              <FrictionFeedbackBanner trigger="error" context="Analysis failed" />
+            </div>
+          )}
+
+          <Card className="p-6 space-y-6">
           {/* Product Type Selector */}
           <div className="space-y-2">
             <Label>Product Type</Label>
@@ -587,8 +598,8 @@ const Upload = () => {
             )}
           </Button>
         </Card>
-      </div>
-    </main>
+        </div>
+      </AppShell>
     </TooltipProvider>
   );
 };

@@ -16,6 +16,8 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
 import { PaywallModal } from "@/components/paywall/PaywallModal";
 import { UsageCounter } from "@/components/paywall/UsageCounter";
+import AppShell from "@/components/AppShell";
+import PageHeader from "@/components/PageHeader";
 
 interface Analysis {
   id: string;
@@ -418,40 +420,45 @@ export default function Routine() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Navigation Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={() => navigate('/')}>
-              <Home className="w-4 h-4 mr-2" />
-              Home
-            </Button>
-            <Button variant="ghost" onClick={() => navigate(-1)}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-            <Button variant="ghost" onClick={() => navigate('/profile')}>
-              <User className="w-4 h-4 mr-2" />
-              Profile
-            </Button>
-          </div>
-          <Button variant="default" onClick={() => navigate('/upload')}>
-            <Plus className="w-4 h-4 mr-2" />
-            Scan Product
-          </Button>
-        </div>
-
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">{routineName}</h1>
+      <AppShell
+        header={
+          <PageHeader>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2">
+                <Button variant="ghost" onClick={() => navigate('/')}>
+                  <Home className="w-4 h-4 mr-2" />
+                  Home
+                </Button>
+                <Button variant="ghost" onClick={() => navigate(-1)}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+                <Button variant="ghost" onClick={() => navigate('/profile')}>
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </Button>
+              </div>
+              <Button variant="default" onClick={() => navigate('/upload')}>
+                <Plus className="w-4 h-4 mr-2" />
+                Scan Product
+              </Button>
+            </div>
+            <div className="mt-4">
+              <h1 className="text-3xl md:text-4xl font-bold">{routineName}</h1>
               <p className="text-muted-foreground">
                 Build and optimize your personal care routine (face, body, & hair)
               </p>
             </div>
+          </PageHeader>
+        }
+        contentClassName="px-4 py-8"
+      >
+        <div className="container mx-auto max-w-6xl">
+
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
             {/* Routine & Product Limits Display */}
-            <div className="hidden md:flex flex-col gap-1 text-sm text-right">
+            <div className="hidden md:flex flex-col gap-1 text-sm text-right ml-auto">
               <div className="flex items-center gap-2 justify-end">
                 <span className="text-muted-foreground">Products:</span>
                 <Badge variant={routineProducts.length >= maxProducts ? "destructive" : "secondary"}>
@@ -934,8 +941,8 @@ export default function Routine() {
           }
           showTrial={effectiveTier === 'free'}
         />
-      </div>
-    </div>
+        </div>
+      </AppShell>
     </TooltipProvider>
   );
 }

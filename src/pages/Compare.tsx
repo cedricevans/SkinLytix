@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import Navigation from "@/components/Navigation";
+import AppShell from "@/components/AppShell";
 import { ResponsiveBottomNav } from "@/components/ResponsiveBottomNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -312,9 +312,8 @@ export default function Compare() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <div className="container mx-auto px-4 py-8 pb-24 lg:pb-8">
+      <AppShell showNavigation contentClassName="px-4 py-8">
+        <div className="container mx-auto pb-24 lg:pb-8">
           <Skeleton className="h-10 w-48 mb-6" />
           <Skeleton className="h-12 w-full mb-8" />
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -322,15 +321,13 @@ export default function Compare() {
           </div>
         </div>
         <ResponsiveBottomNav />
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <main className="container mx-auto px-4 py-6 pb-24 lg:pb-8">
+    <AppShell showNavigation contentClassName="px-4 py-6">
+      <main className="container mx-auto pb-24 lg:pb-8">
         <Button 
           variant="ghost" 
           onClick={() => navigate(-1)} 
@@ -570,6 +567,6 @@ export default function Compare() {
         feature="dupe_discovery"
         featureDescription="Unlock unlimited dupe discovery to find the best value products"
       />
-    </div>
+    </AppShell>
   );
 }
