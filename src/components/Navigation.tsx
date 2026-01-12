@@ -3,7 +3,6 @@ import { Menu, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useReviewerAccess } from "@/hooks/useReviewerAccess";
 
 const navigationItems = [
@@ -16,7 +15,6 @@ const navigationItems = [
 const Navigation = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const { hasAccess: hasReviewerAccess } = useReviewerAccess();
 
   const scrollToSection = (href: string, isRoute?: boolean) => {
@@ -30,7 +28,10 @@ const Navigation = () => {
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
         setOpen(false);
+        return;
       }
+      navigate(`/${href}`);
+      setOpen(false);
     }
   };
 
@@ -44,21 +45,20 @@ const Navigation = () => {
     setOpen(false);
   };
 
-  // Mobile Navigation
-  if (isMobile) {
-    return (
+  return (
+    <>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
-            className="text-primary-foreground hover:bg-primary-foreground/10"
+            className="md:hidden text-primary-foreground hover:bg-primary-foreground/10"
             aria-label="Open menu"
           >
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+        <SheetContent side="right" className="md:hidden w-[280px] sm:w-[320px]">
           <nav className="flex flex-col gap-4 mt-8">
             {navigationItems.map((item) => (
               <button
@@ -100,42 +100,39 @@ const Navigation = () => {
           </nav>
         </SheetContent>
       </Sheet>
-    );
-  }
 
-  // Desktop Navigation
-  return (
-    <nav className="flex items-center gap-6">
-      {navigationItems.map((item) => (
-        <button
-          key={item.label}
-          onClick={() => scrollToSection(item.href, (item as any).isRoute)}
-          className="text-sm font-subheading text-primary-foreground hover:text-primary-foreground/80 transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary-foreground after:transition-all after:duration-300"
+      <nav className="hidden md:flex items-center gap-6">
+        {navigationItems.map((item) => (
+          <button
+            key={item.label}
+            onClick={() => scrollToSection(item.href, (item as any).isRoute)}
+            className="text-sm font-subheading text-primary-foreground hover:text-primary-foreground/80 transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary-foreground after:transition-all after:duration-300"
+          >
+            {item.label}
+          </button>
+        ))}
+        {hasReviewerAccess && (
+          <button
+            onClick={() => navigate('/dashboard/reviewer')}
+            className="text-sm font-subheading text-primary-foreground hover:text-primary-foreground/80 transition-colors flex items-center gap-1.5"
+          >
+            <ClipboardCheck className="w-4 h-4" />
+            Reviewer
+          </button>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="bg-white/20 text-white border border-white/50 hover:bg-white/30 transition-all"
+          onClick={handleSignIn}
         >
-          {item.label}
-        </button>
-      ))}
-      {hasReviewerAccess && (
-        <button
-          onClick={() => navigate('/dashboard/reviewer')}
-          className="text-sm font-subheading text-primary-foreground hover:text-primary-foreground/80 transition-colors flex items-center gap-1.5"
-        >
-          <ClipboardCheck className="w-4 h-4" />
-          Reviewer
-        </button>
-      )}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="bg-white/20 text-white border border-white/50 hover:bg-white/30 transition-all"
-        onClick={handleSignIn}
-      >
-        Sign In
-      </Button>
-      <Button variant="cta" size="sm" onClick={handleGetStarted}>
-        Get Started Free
-      </Button>
-    </nav>
+          Sign In
+        </Button>
+        <Button variant="cta" size="sm" onClick={handleGetStarted}>
+          Get Started Free
+        </Button>
+      </nav>
+    </>
   );
 };
 
