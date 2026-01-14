@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ClipboardCheck, LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate } from "react-router-dom";
 import { useReviewerAccess } from "@/hooks/useReviewerAccess";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 type NavigationVariant = "marketing" | "app";
 
@@ -24,35 +25,19 @@ const appNavigationItems = [
   { label: "Profile", href: "/profile", isRoute: true },
 ];
 
-const Navigation = ({ variant = "marketing" }: { variant?: NavigationVariant }) => {
+const Navigation = ({
+  variant = "marketing",
+  onAskGpt,
+}: {
+  variant?: NavigationVariant;
+  onAskGpt?: () => void;
+}) => {
   const [open, setOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
   const { hasAccess: hasReviewerAccess } = useReviewerAccess();
+  const { toast } = useToast();
   const isAppNav = variant === "app";
   const navigationItems = isAppNav ? appNavigationItems : marketingNavigationItems;
-
-  useEffect(() => {
-    let mounted = true;
-
-    const loadUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (mounted) {
-        setIsAuthenticated(!!user);
-      }
-    };
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session?.user);
-    });
-
-    loadUser();
-
-    return () => {
-      mounted = false;
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
 
   const scrollToSection = (href: string, isRoute?: boolean) => {
     if (isRoute) {
@@ -86,6 +71,46 @@ const Navigation = ({ variant = "marketing" }: { variant?: NavigationVariant }) 
     await supabase.auth.signOut();
     setOpen(false);
     navigate("/", { replace: true });
+  };
+
+  const handleAskGpt = async () => {
+    if (!isAppNav) return;
+    if (onAskGpt) {
+      onAskGpt();
+      setOpen(false);
+      return;
+    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/auth");
+        setOpen(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("user_analyses")
+        .select("id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (data?.id) {
+        navigate(`/analysis/${data.id}?chat=1`);
+      } else {
+        navigate("/upload");
+      }
+    } catch (error) {
+      console.error("Failed to open SkinLytixGPT:", error);
+      toast({
+        title: "Unable to open chat",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      });
+    } finally {
+      setOpen(false);
+    }
   };
 
   return (
@@ -124,7 +149,18 @@ const Navigation = ({ variant = "marketing" }: { variant?: NavigationVariant }) 
                 Reviewer
               </button>
             )}
-            {isAppNav && isAuthenticated ? (
+            {isAppNav && onAskGpt && (
+              <div className="mt-2 px-4">
+                <Button
+                  variant="cta"
+                  className="w-full"
+                  onClick={handleAskGpt}
+                >
+                  Ask SkinLytixGPT
+                </Button>
+              </div>
+            )}
+            {isAppNav ? (
               <div className="mt-4 space-y-3 px-4">
                 <Button
                   variant="outline"
@@ -176,7 +212,16 @@ const Navigation = ({ variant = "marketing" }: { variant?: NavigationVariant }) 
             Reviewer
           </button>
         )}
-        {isAppNav && isAuthenticated ? (
+        {isAppNav && onAskGpt && (
+          <Button
+            variant="cta"
+            size="sm"
+            onClick={handleAskGpt}
+          >
+            Ask SkinLytixGPT
+          </Button>
+        )}
+        {isAppNav ? (
           <Button
             variant="ghost"
             size="sm"

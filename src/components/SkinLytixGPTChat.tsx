@@ -390,33 +390,6 @@ export const SkinLytixGPTChat = ({
 
   return (
     <>
-      {/* Floating Chat Bubble - Desktop Only */}
-      {!isOpen && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => {
-                  setIsOpen(true);
-                  trackEvent({
-                    eventName: 'chat_opened',
-                    eventCategory: 'chat',
-                    eventProperties: { analysisId, source: 'floating_bubble' }
-                  });
-                }}
-                className="hidden lg:block fixed bottom-6 right-24 z-40 bg-gradient-to-r from-[hsl(346,100%,60%)] to-[hsl(346,100%,70%)] text-white rounded-full p-4 shadow-lg transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[hsl(346,100%,60%)] focus:ring-offset-2 animate-pulse"
-                aria-label="Open SkinLytixGPT chat"
-              >
-                <Sparkles className="w-6 h-6" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>SkinLytixGPT</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
-
       {/* Chat Panel/Sheet */}
       {isOpen && (
         <div className="fixed inset-0 lg:inset-auto lg:right-0 lg:top-0 lg:bottom-0 lg:w-[400px] z-50 bg-background border-l shadow-2xl flex flex-col animate-slide-in-right">

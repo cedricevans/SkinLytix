@@ -1,6 +1,35 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Heart, Instagram, AtSign, Facebook } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 const Footer = () => {
+  const navigate = useNavigate();
+  const [showFeedback, setShowFeedback] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (mounted) {
+        setShowFeedback(!!user);
+      }
+    };
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setShowFeedback(!!session?.user);
+    });
+
+    loadUser();
+
+    return () => {
+      mounted = false;
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
   return (
     <footer className="py-12 px-6 bg-primary text-primary-foreground">
       <div className="max-w-6xl mx-auto">
@@ -68,10 +97,17 @@ const Footer = () => {
           <p className="text-sm font-body text-primary-foreground/60">
             © 2025 SkinLytix. Built with open science & real user data.
           </p>
-          <div className="flex items-center gap-2 text-sm font-body text-primary-foreground/60">
-            <span>Made with</span>
-            <Heart className="w-4 h-4 text-cta fill-cta" />
-            <span>for beauty enthusiasts everywhere</span>
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <div className="flex items-center gap-2 text-sm font-body text-primary-foreground/60">
+              <span>Made with</span>
+              <Heart className="w-4 h-4 text-cta fill-cta" />
+              <span>for beauty enthusiasts everywhere</span>
+            </div>
+            {showFeedback && (
+              <Button variant="cta" size="sm" onClick={() => navigate("/beta-feedback")}>
+                Feedback
+              </Button>
+            )}
           </div>
         </div>
       </div>

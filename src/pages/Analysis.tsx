@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -97,6 +97,7 @@ interface AnalysisData {
 const Analysis = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   useTracking('analysis');
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
@@ -265,6 +266,13 @@ const Analysis = () => {
 
     return () => window.clearTimeout(timeoutId);
   }, [analysis, isUpgradingScan, autoUpgradeTriggered]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("chat") === "1") {
+      setIsChatOpen(true);
+    }
+  }, [location.search]);
 
 
   const handleAddToRoutine = async () => {
@@ -521,6 +529,7 @@ const Analysis = () => {
         contentClassName="px-4 py-6 md:py-10"
         showNavigation
         showBottomNav
+        onAskGpt={() => setIsChatOpen(true)}
         bottomNavProps={{
           onAddToRoutine: handleAddToRoutine,
           showAddToRoutine: true,

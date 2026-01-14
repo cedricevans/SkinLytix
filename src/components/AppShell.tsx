@@ -12,6 +12,7 @@ type AppShellProps = {
   showFooter?: boolean;
   showBottomNav?: boolean;
   bottomNavProps?: ResponsiveBottomNavProps;
+  onAskGpt?: () => void;
   className?: string;
   contentClassName?: string;
 };
@@ -24,6 +25,7 @@ const AppShell = ({
   showFooter = true,
   showBottomNav = false,
   bottomNavProps,
+  onAskGpt,
   className,
   contentClassName,
 }: AppShellProps) => {
@@ -35,7 +37,7 @@ const AppShell = ({
             <h2 className="text-xl md:text-2xl font-heading font-bold text-primary-foreground">
               SkinLytix
             </h2>
-            <Navigation variant="app" />
+            <Navigation variant="app" onAskGpt={onAskGpt} />
           </div>
         </header>
       )}

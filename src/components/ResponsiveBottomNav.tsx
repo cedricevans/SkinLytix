@@ -53,6 +53,9 @@ export const ResponsiveBottomNav = ({ onAddToRoutine, showAddToRoutine = true, o
       label: "Chat",
       action: onChatOpen,
       show: !!onChatOpen,
+      className: "bg-cta/20 text-cta hover:bg-cta/30 active:bg-cta/40",
+      iconClassName: "text-cta",
+      labelClassName: "text-cta",
     },
   ].filter(item => item.show);
 
@@ -74,11 +77,12 @@ export const ResponsiveBottomNav = ({ onAddToRoutine, showAddToRoutine = true, o
               className={cn(
                 "flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg",
                 "transition-all duration-200 active:scale-95",
-                "hover:bg-accent/50 active:bg-accent"
+                "hover:bg-accent/50 active:bg-accent",
+                item.className
               )}
             >
-              <Icon className="w-4 h-4 text-foreground" />
-              <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
+              <Icon className={cn("w-4 h-4 text-foreground", item.iconClassName)} />
+              <span className={cn("text-xs font-medium text-muted-foreground", item.labelClassName)}>{item.label}</span>
             </button>
           );
         })}

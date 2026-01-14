@@ -1,10 +1,13 @@
 import { AppWalkthrough } from "@/components/AppWalkthrough";
+import AppShell from "@/components/AppShell";
 
 const Walkthrough = () => {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center">
-      <AppWalkthrough />
-    </main>
+    <AppShell showNavigation showBottomNav contentClassName="px-4 py-12">
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <AppWalkthrough />
+      </div>
+    </AppShell>
   );
 };
 

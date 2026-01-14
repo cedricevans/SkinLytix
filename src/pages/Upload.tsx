@@ -431,10 +431,10 @@ const Upload = () => {
         showBottomNav
         header={
           <PageHeader>
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-col gap-3">
               <div className="flex flex-wrap gap-2">
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => navigate('/home')}
                   className="gap-2"
                 >
@@ -442,7 +442,7 @@ const Upload = () => {
                   Home
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => navigate('/profile')}
                   className="gap-2"
                 >
@@ -450,8 +450,6 @@ const Upload = () => {
                   Profile
                 </Button>
               </div>
-            </div>
-            <div className="mt-4">
               <h1 className="text-3xl md:text-4xl font-bold">Upload Product</h1>
             </div>
           </PageHeader>

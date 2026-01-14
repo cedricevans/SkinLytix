@@ -632,13 +632,21 @@ export default function Routine() {
 
         {/* Available Products to Add */}
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
             <h2 className="text-2xl font-bold">Add Products</h2>
-            <div className="flex gap-2">
-              <Button onClick={() => setShowProductsDialog(true)} variant="outline">
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:w-auto">
+              <Button
+                onClick={() => setShowProductsDialog(true)}
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
                 View All Products ({availableAnalyses.length})
               </Button>
-              <Button onClick={() => setShowManualEntryDialog(true)} variant="default">
+              <Button
+                onClick={() => setShowManualEntryDialog(true)}
+                variant="default"
+                className="w-full sm:w-auto"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add New Product
               </Button>

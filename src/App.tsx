@@ -26,6 +26,8 @@ import StudentReviewer from "./pages/dashboard/StudentReviewer";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TrialCountdown } from "@/components/subscription/TrialCountdown";
+import ScrollToTop from "@/components/ScrollToTop";
+import AppProtectedRoute from "@/components/AppProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -36,26 +38,27 @@ const App = () => (
       <Sonner />
       <TrialCountdown />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/home" element={<AppProtectedRoute><Home /></AppProtectedRoute>} />
           <Route path="/ig" element={<InstagramLanding />} />
           <Route path="/demo-analysis" element={<DemoAnalysis />} />
-          <Route path="/upload" element={<Upload />} />
-          <Route path="/analysis/:id" element={<Analysis />} />
-          <Route path="/analysis-fast" element={<AnalysisFast />} />
+          <Route path="/upload" element={<AppProtectedRoute><Upload /></AppProtectedRoute>} />
+          <Route path="/analysis/:id" element={<AppProtectedRoute><Analysis /></AppProtectedRoute>} />
+          <Route path="/analysis-fast" element={<AppProtectedRoute><AnalysisFast /></AppProtectedRoute>} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/walkthrough" element={<Walkthrough />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/routine" element={<Routine />} />
-          <Route path="/routine/optimization/:id" element={<RoutineOptimization />} />
-          <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-          <Route path="/beta-feedback" element={<BetaFeedback />} />
-          <Route path="/compare" element={<Compare />} />
-          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/onboarding" element={<AppProtectedRoute><Onboarding /></AppProtectedRoute>} />
+          <Route path="/walkthrough" element={<AppProtectedRoute><Walkthrough /></AppProtectedRoute>} />
+          <Route path="/profile" element={<AppProtectedRoute><Profile /></AppProtectedRoute>} />
+          <Route path="/routine" element={<AppProtectedRoute><Routine /></AppProtectedRoute>} />
+          <Route path="/routine/optimization/:id" element={<AppProtectedRoute><RoutineOptimization /></AppProtectedRoute>} />
+          <Route path="/analytics" element={<AppProtectedRoute><ProtectedRoute><Analytics /></ProtectedRoute></AppProtectedRoute>} />
+          <Route path="/beta-feedback" element={<AppProtectedRoute><BetaFeedback /></AppProtectedRoute>} />
+          <Route path="/compare" element={<AppProtectedRoute><Compare /></AppProtectedRoute>} />
+          <Route path="/favorites" element={<AppProtectedRoute><Favorites /></AppProtectedRoute>} />
           <Route path="/pricing" element={<Pricing />} />
-          <Route path="/dashboard/reviewer" element={<ProtectedRoute><StudentReviewer /></ProtectedRoute>} />
+          <Route path="/dashboard/reviewer" element={<AppProtectedRoute><ProtectedRoute><StudentReviewer /></ProtectedRoute></AppProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

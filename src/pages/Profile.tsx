@@ -568,109 +568,139 @@ const Profile = () => {
           <TabsContent value="overview" className="space-y-6">
             {/* Stats Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <TrendingUp className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Products Analyzed</p>
-                    {isLoadingStats ? (
-                      <p className="text-2xl font-bold">-</p>
-                    ) : (
-                      <p className="text-2xl font-bold">{stats.totalAnalyses}</p>
-                    )}
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <Calendar className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Latest Routine</p>
-                    {isLoadingStats ? (
-                      <p className="text-sm font-semibold">-</p>
-                    ) : stats.latestRoutine ? (
-                      <>
-                        <p className="text-sm font-semibold truncate">{stats.latestRoutine.name}</p>
-                        <p className="text-xs text-muted-foreground">{stats.latestRoutine.lastUsed}</p>
-                      </>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No routines yet</p>
-                    )}
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <DollarSign className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm text-muted-foreground">Potential Savings</p>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="w-4 h-4 text-muted-foreground cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-xs">
-                            <p className="text-xs">Save this amount by switching to our recommended alternative products that offer similar benefits at lower prices.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+              <button
+                type="button"
+                onClick={() => setActiveTab("products")}
+                className="text-left"
+              >
+                <Card className="p-6 transition hover:border-primary/40 hover:bg-primary/5 cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary/10 rounded-lg">
+                      <TrendingUp className="w-6 h-6 text-primary" />
                     </div>
-                    {isLoadingStats ? (
-                      <p className="text-2xl font-bold text-muted-foreground">-</p>
-                    ) : stats.totalSavings > 0 ? (
-                      <p className="text-2xl font-bold text-green-600">${stats.totalSavings.toFixed(2)}</p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No recommendations yet</p>
-                    )}
+                    <div>
+                      <p className="text-sm text-muted-foreground">Products Analyzed</p>
+                      {isLoadingStats ? (
+                        <p className="text-2xl font-bold">-</p>
+                      ) : (
+                        <p className="text-2xl font-bold">{stats.totalAnalyses}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </button>
 
-              <Card className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <Sparkles className="w-6 h-6 text-primary" />
+              <button
+                type="button"
+                onClick={() => setActiveTab("routines")}
+                className="text-left"
+              >
+                <Card className="p-6 transition hover:border-primary/40 hover:bg-primary/5 cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary/10 rounded-lg">
+                      <Calendar className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Latest Routine</p>
+                      {isLoadingStats ? (
+                        <p className="text-sm font-semibold">-</p>
+                      ) : stats.latestRoutine ? (
+                        <>
+                          <p className="text-sm font-semibold truncate">{stats.latestRoutine.name}</p>
+                          <p className="text-xs text-muted-foreground">{stats.latestRoutine.lastUsed}</p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No routines yet</p>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Recommendations</p>
-                    {isLoadingStats ? (
-                      <p className="text-2xl font-bold text-muted-foreground">-</p>
-                    ) : stats.recommendationsAvailable > 0 ? (
-                      <p className="text-2xl font-bold">{stats.recommendationsAvailable}</p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">None yet</p>
-                    )}
-                  </div>
-                </div>
-              </Card>
+                </Card>
+              </button>
 
-              <Card className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/20 rounded-lg">
-                    <MessageSquare className="w-6 h-6 text-primary" />
+              <button
+                type="button"
+                onClick={() => setActiveTab("routines")}
+                className="text-left"
+              >
+                <Card className="p-6 transition hover:border-primary/40 hover:bg-primary/5 cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary/10 rounded-lg">
+                      <DollarSign className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-sm text-muted-foreground">Potential Savings</p>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p className="text-xs">Save this amount by switching to our recommended alternative products that offer similar benefits at lower prices.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      {isLoadingStats ? (
+                        <p className="text-2xl font-bold text-muted-foreground">-</p>
+                      ) : stats.totalSavings > 0 ? (
+                        <p className="text-2xl font-bold text-green-600">${stats.totalSavings.toFixed(2)}</p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No recommendations yet</p>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Your Impact</p>
-                    {feedbackCount > 0 ? (
-                      <>
-                        <p className="text-2xl font-bold">🎯 {feedbackCount}</p>
-                        <p className="text-xs text-muted-foreground">feedback{feedbackCount !== 1 ? 's' : ''} submitted</p>
-                      </>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No feedback yet</p>
-                    )}
+                </Card>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("routines")}
+                className="text-left"
+              >
+                <Card className="p-6 transition hover:border-primary/40 hover:bg-primary/5 cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary/10 rounded-lg">
+                      <Sparkles className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Recommendations</p>
+                      {isLoadingStats ? (
+                        <p className="text-2xl font-bold text-muted-foreground">-</p>
+                      ) : stats.recommendationsAvailable > 0 ? (
+                        <p className="text-2xl font-bold">{stats.recommendationsAvailable}</p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">None yet</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/beta-feedback")}
+                className="text-left"
+              >
+                <Card className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20 transition hover:border-primary/40 hover:bg-primary/10 cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary/20 rounded-lg">
+                      <MessageSquare className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Your Impact</p>
+                      {feedbackCount > 0 ? (
+                        <>
+                          <p className="text-2xl font-bold">🎯 {feedbackCount}</p>
+                          <p className="text-xs text-muted-foreground">feedback{feedbackCount !== 1 ? 's' : ''} submitted</p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No feedback yet</p>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              </button>
             </div>
 
             {/* Profile Card */}
